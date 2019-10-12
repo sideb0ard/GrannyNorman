@@ -42,3 +42,8 @@ AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numF
 void AudioEngine::tap(bool b){
     osc.setWaveOn(b);
 }
+
+void AudioEngine::setFrequency(float d) {
+    osc.setFrequency(d);
+
+}

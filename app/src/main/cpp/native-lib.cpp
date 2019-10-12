@@ -23,7 +23,7 @@ Java_com_theb0ardside_grannynorman_MainActivity_tap(JNIEnv *env, jobject instanc
 JNIEXPORT void JNICALL
 Java_com_theb0ardside_grannynorman_MainActivity_setFrequency(JNIEnv *env, jobject instance, jfloat frequency)
 {
-    // TODO
+    engine.setFrequency(frequency);
 }
 
 }

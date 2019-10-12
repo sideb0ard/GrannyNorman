@@ -23,6 +23,8 @@ public:
 
     AudioStream *stream;
     Oscillator osc;
+
+    void setFrequency(float d);
 };
 
 
