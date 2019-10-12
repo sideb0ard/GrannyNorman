@@ -1,10 +1,29 @@
 #include <jni.h>
 #include <string>
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_theb0ardside_grannynorman_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+#include "AudioEngine.h"
+
+
+AudioEngine engine;
+
+extern "C" {
+    JNIEXPORT void JNICALL
+    Java_com_theb0ardside_grannynorman_MainActivity_startEngine(JNIEnv *env, jobject instance)
+    {
+        engine.start();
+    }
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_tap(JNIEnv *env, jobject instance, jboolean b)
+{
+    engine.tap(b);
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_setFrequency(JNIEnv *env, jobject instance, jfloat frequency)
+{
+    // TODO
+}
+
 }
