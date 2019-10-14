@@ -32,6 +32,7 @@ private:
     Oscillator osc_;
 
     WavData think_sample_;
+    int read_idx;
 
 
 };

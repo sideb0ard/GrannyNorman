@@ -6,12 +6,13 @@
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/cstring"
 #include "oboe/src/common/OboeDebug.h"
 
-void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer) {
+void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
 
     // Format details from:
     // http://soundfile.sapp.org/doc/WaveFormat/
 
     int buffer_idx = 0;
+    // unsigned char const *unsigned_buffer = (unsigned char const *)buffer;
 
     char scratch[5];
     scratch[4] = '\0';
@@ -26,16 +27,16 @@ void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer) {
 
         // ChunkSize
         int chunksize =
-                (unsigned) buffer[0] | ((unsigned) buffer[1]) << 8 | ((unsigned) buffer[2]) << 16 |
-                ((unsigned) buffer[3]) << 24;
-        buffer_idx += 4;
+                (int) buffer[buffer_idx] | (int) buffer[buffer_idx + 1] << 8 |
+                (int) buffer[buffer_idx + 2] << 16 |
+                (int) buffer[buffer_idx + 3] << 24;
 
         __android_log_print(ANDROID_LOG_ERROR, "WOOP", "CHUNSIZE::: %d", chunksize);
-
-//            ss.read(scratch, 4);
-//            unsigned int overall_size =
-//                    scratch[0] | scratch[1] << 8 | scratch[2] << 16 | scratch[3] << 24;
-//            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "Overall Size:%lu", overall_size);
+        for (int i = 0; i < 4; i++) {
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "BYTE %d::: %d", i,
+                                buffer[buffer_idx + i]);
+        }
+        buffer_idx += 4;
 
         // Format
         memcpy(scratch, &buffer[buffer_idx], 4);
@@ -52,12 +53,30 @@ void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer) {
             buffer_idx += 4;
 
             // AudioFormat
+            int audio_format =
+                    (unsigned) buffer[buffer_idx] | ((unsigned) buffer[buffer_idx + 1]) << 8;
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "FORMAT::: %d", audio_format);
             buffer_idx += 2;
 
             // NumChannels
+            wavData->num_channels =
+                    (unsigned) buffer[buffer_idx] | ((unsigned) buffer[buffer_idx + 1]) << 8;
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "NUM CHANNELS::: %d",
+                                wavData->num_channels);
             buffer_idx += 2;
 
             // SampleRate
+
+            wavData->sample_rate =
+                    (int) buffer[buffer_idx] | (int) buffer[buffer_idx + 1] << 8 |
+                    (int) buffer[buffer_idx + 2] << 16 |
+                    (int) buffer[buffer_idx + 3] << 24;
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "SAMPLERATE::: %d",
+                                wavData->sample_rate);
+            for (int i = 0; i < 4; i++) {
+                __android_log_print(ANDROID_LOG_ERROR, "WOOP", "BYTE %d::: %d", i,
+                                    (unsigned int) buffer[buffer_idx + i]);
+            }
             buffer_idx += 4;
 
             // ByteRate
@@ -82,13 +101,19 @@ void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer) {
             //                               You can also think of this as the size
             //                               of the read of the subchunk following this
             //                               number.
+            int data_size_bytes =
+                    (int) buffer[buffer_idx] | (int) buffer[buffer_idx + 1] << 8 |
+                    (int) buffer[buffer_idx + 2] << 16 |
+                    (int) buffer[buffer_idx + 3] << 24;
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "DATA SIZE BYTES::: %d",
+                                data_size_bytes);
             buffer_idx += 4;
 
             // DATA!
-            // int data_size = scratch[0] | scratch[1] << 8 | scratch[2] << 16 | scratch[3] << 24;
-            // allocate SubChunk2Size memory for data
-            // think_sample_.data = new();
-            // ss.read(think_sample_.data, data_size);
+            wavData->data_len = data_size_bytes / sizeof(short);
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "DATA LEN::: %lu", wavData->data_len);
+            wavData->data = new short[wavData->data_len];
+            memcpy(wavData->data, &buffer[buffer_idx], data_size_bytes);
 
 
         } else {

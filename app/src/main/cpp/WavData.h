@@ -7,13 +7,13 @@
 
 struct WavData {
     short *data = nullptr;
-    unsigned long data_size{0};
+    unsigned long data_len{0};
     int num_channels{0};
     int sample_rate{0};
     int precision{0};
 };
 
-void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer );
+void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer );
 
 // void LoadWavData()
 

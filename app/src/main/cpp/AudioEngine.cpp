@@ -35,7 +35,20 @@ void AudioEngine::start() {
 
 DataCallbackResult
 AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames) {
-    osc_.renderAudio(static_cast<float *>(audioData), numFrames);
+
+//    osc_.renderAudio(static_cast<float *>(audioData), numFrames);
+
+
+    float *data = static_cast<float *>(audioData);
+    for (int i = 0; i < numFrames; i+=2) {
+
+
+        data[i] = think_sample_.data[read_idx];
+        data[i+1] = think_sample_.data[read_idx];
+        read_idx+= think_sample_.num_channels;
+        if (read_idx >= think_sample_.data_len) read_idx = 0;
+    }
+
 
     return DataCallbackResult::Continue;
 }
@@ -58,7 +71,8 @@ void AudioEngine::LoadSamples(AAssetManager *mgr) {
     }
 
 
-    char const *asset_buffer = static_cast<char const *>(AAsset_getBuffer(think_wav));
+    unsigned char const *asset_buffer = static_cast<unsigned char const *>(AAsset_getBuffer(
+            think_wav));
     if (asset_buffer) {
 
         WavDataLoadFromAssetBuffer(&think_sample_, asset_buffer);
