@@ -5,13 +5,16 @@
 #ifndef GRANNYNORMAN_WAVDATA_H
 #define GRANNYNORMAN_WAVDATA_H
 
-// taken from http://rogerchansdigitalworld.blogspot.com/2010/05/how-to-read-wav-format-file-in-c.html
-
 struct WavData {
-    short* data= nullptr;
-    unsigned long size{0};
+    short *data = nullptr;
+    unsigned long data_size{0};
+    int num_channels{0};
+    int sample_rate{0};
+    int precision{0};
 };
 
-void LoadWavData()
+void WavDataLoadFromAssetBuffer(WavData *wavData, char const *buffer );
+
+// void LoadWavData()
 
 #endif //GRANNYNORMAN_WAVDATA_H

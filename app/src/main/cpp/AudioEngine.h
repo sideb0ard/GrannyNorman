@@ -11,7 +11,7 @@
 #include "oboe/include/oboe/Definitions.h"
 #include "oboe/samples/shared/Oscillator.h"
 
-#include "WavData.cpp"
+#include "WavData.h"
 
 using namespace oboe;
 
@@ -24,7 +24,7 @@ public:
     virtual DataCallbackResult
     onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames);
 
-    bool LoadSamples(AAssetManager *mgr);
+    void LoadSamples(AAssetManager *mgr);
     void setFrequency(float d);
 
 private:

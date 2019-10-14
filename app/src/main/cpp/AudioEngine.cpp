@@ -48,25 +48,22 @@ void AudioEngine::setFrequency(float d) {
     osc_.setFrequency(d);
 }
 
-bool AudioEngine::LoadSamples(AAssetManager *mgr) {
+void AudioEngine::LoadSamples(AAssetManager *mgr) {
 
-    char const *think_sample = "thinkloop.wav";
-
-    AAssetDir *assetDir = AAssetManager_openDir(mgr, "Sounds");
-    const char *filename;
-    while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL) {
-        __android_log_print(ANDROID_LOG_ERROR, "DJOBBIO", "File:%s", filename);
-        if (strncmp(filename, think_sample, strlen(think_sample)) == 0) {
-            __android_log_print(ANDROID_LOG_ERROR, "DJOBBIO", "COMPARED WELL!");
-
-            AAsset * think_wav = AAssetManager_open(mgr, "Sounds/thinkloop.wav", AASSET_MODE_BUFFER);
-            if (think_wav) {
-                __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THINK: %d", AAsset_getLength(think_wav));
-            }
-        }
+    AAsset *think_wav = AAssetManager_open(mgr, "Sounds/thinkloop.wav", AASSET_MODE_BUFFER);
+    int file_size{0};
+    if (think_wav) {
+        file_size = AAsset_getLength(think_wav);
+        __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THINK: %d", file_size);
     }
 
-    AAssetDir_close(assetDir);
 
-    return true;
+    char const *asset_buffer = static_cast<char const *>(AAsset_getBuffer(think_wav));
+    if (asset_buffer) {
+
+        WavDataLoadFromAssetBuffer(&think_sample_, asset_buffer);
+
+    }
+
+
 }
