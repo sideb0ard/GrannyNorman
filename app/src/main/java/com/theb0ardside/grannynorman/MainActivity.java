@@ -2,6 +2,7 @@ package com.theb0ardside.grannynorman;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.AssetManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,19 +14,15 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private native void startEngine();
+
     private native void tap(boolean b);
+
     private native void setFrequency(float frequency);
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            tap(true);
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            tap(false);
-        }
-        return super.onTouchEvent(event);
-    }
+    private native void loadSamples(AssetManager mgr);
+
+    private AssetManager mgr;
+
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -37,17 +34,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startEngine();
+        TextView textView = (TextView) findViewById(R.id.text_view);
+        textView.setText("JIMMMMEMEM");
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
+        mgr = getResources().getAssets();
+
+        loadSamples(mgr);
+        startEngine();
+
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            tap(true);
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            tap(false);
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        setFrequency(20  + (event.values[0] * 80));
+        setFrequency(20 + (event.values[0] * 80));
     }
 
     @Override

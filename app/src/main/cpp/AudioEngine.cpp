@@ -34,12 +34,12 @@ void AudioEngine::start() {
 
 DataCallbackResult
 AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames) {
-    osc.renderAudio(static_cast<float*>(audioData), numFrames);
+    osc.renderAudio(static_cast<float *>(audioData), numFrames);
 
     return DataCallbackResult::Continue;
 }
 
-void AudioEngine::tap(bool b){
+void AudioEngine::tap(bool b) {
     osc.setWaveOn(b);
 }
 
