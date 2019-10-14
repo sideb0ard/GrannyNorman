@@ -3,13 +3,13 @@
 #include <android/asset_manager_jni.h>
 
 #include "AudioEngine.h"
-#include "SampleFileManager.h"
 
 
 AudioEngine engine;
-SampleFileManager sampleManager;
+
 
 extern "C" {
+
 JNIEXPORT void JNICALL
 Java_com_theb0ardside_grannynorman_MainActivity_startEngine(JNIEnv *env, jobject instance) {
     engine.start();
@@ -32,7 +32,7 @@ Java_com_theb0ardside_grannynorman_MainActivity_loadSamples(JNIEnv *env, jobject
                                                             jobject assetManager) {
 
     AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
-    sampleManager.LoadSamples(mgr);
+    engine.LoadSamples(mgr);
 }
 
 }
