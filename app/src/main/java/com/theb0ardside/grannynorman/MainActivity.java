@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private AssetManager mgr;
 
+    private boolean active;
+
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         mgr = getResources().getAssets();
+        active = true;
 
         loadSamples(mgr);
         startEngine();
@@ -52,9 +55,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            tap(true);
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            tap(false);
+            active = !active;
+            tap(active);
+//        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+//            tap(false);
         }
         return super.onTouchEvent(event);
     }

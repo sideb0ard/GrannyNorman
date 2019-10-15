@@ -36,6 +36,7 @@ private:
     WavData think_sample_;
     int read_idx;
 
+    bool active_{false};
 
 };
 

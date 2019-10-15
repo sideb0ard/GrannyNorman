@@ -13,13 +13,15 @@ namespace {
             fdata[i] = data[i] / 32768.0;
         }
     }
+
     void ConvertFloatArrayToPCM(float *fdata, int16_t *data, int length)
     {
         for (int i = 0; i < length; ++i){
             data[i] = fdata[i] * 32768.0;
         }
     }
-}
+} // namespace
+
 void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
 
     // Format details from:

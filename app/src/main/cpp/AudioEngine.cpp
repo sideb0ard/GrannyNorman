@@ -32,31 +32,30 @@ void AudioEngine::start() {
 
     stream_->requestStart();
 
+    active_ = true;
+
 }
 
 DataCallbackResult
 AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames) {
 
-//    osc_.renderAudio(static_cast<float *>(audioData), numFrames);
-
-    //AudioFormat dataFormat = oboeStream->getDataFormat();
-
-
-    float *data = static_cast<float *>(audioData);
-    for (int i = 0; i < numFrames; i++) {
-
-
-        data[i] = think_sample_.fdata[read_idx++];
-
-        if (read_idx == think_sample_.data_len) read_idx = 0;
+    if (active_) {
+        float *data = static_cast<float *>(audioData);
+        for (int i = 0; i < numFrames; i++) {
+            data[i] = think_sample_.fdata[read_idx++];
+            if (read_idx == think_sample_.data_len) read_idx = 0;
+        }
+    } else {
+        memset(audioData, 0, sizeof(float) * numFrames);
     }
 
 
-    return DataCallbackResult::Continue;
+    return
+            DataCallbackResult::Continue;
 }
 
 void AudioEngine::tap(bool b) {
-    osc_.setWaveOn(b);
+    active_ = b;
 }
 
 void AudioEngine::setFrequency(float d) {
