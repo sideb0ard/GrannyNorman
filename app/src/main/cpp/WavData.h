@@ -5,8 +5,11 @@
 #ifndef GRANNYNORMAN_WAVDATA_H
 #define GRANNYNORMAN_WAVDATA_H
 
+#include <cstdint>
+
 struct WavData {
-    short *data = nullptr;
+    int16_t *data = nullptr;
+    float *fdata = nullptr;
     unsigned long data_len{0};
     int num_channels{0};
     int sample_rate{0};

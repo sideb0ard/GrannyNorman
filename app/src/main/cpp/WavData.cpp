@@ -6,6 +6,20 @@
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/cstring"
 #include "oboe/src/common/OboeDebug.h"
 
+namespace {
+    void ConvertPCMArrayToFloat(int16_t *data, float *fdata, int length)
+    {
+        for (int i = 0; i < length; ++i){
+            fdata[i] = data[i] / 32768.0;
+        }
+    }
+    void ConvertFloatArrayToPCM(float *fdata, int16_t *data, int length)
+    {
+        for (int i = 0; i < length; ++i){
+            data[i] = fdata[i] * 32768.0;
+        }
+    }
+}
 void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
 
     // Format details from:
@@ -112,8 +126,10 @@ void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
             // DATA!
             wavData->data_len = data_size_bytes / sizeof(short);
             __android_log_print(ANDROID_LOG_ERROR, "WOOP", "DATA LEN::: %lu", wavData->data_len);
-            wavData->data = new short[wavData->data_len];
+            wavData->data = new int16_t[wavData->data_len];
             memcpy(wavData->data, &buffer[buffer_idx], data_size_bytes);
+            wavData->fdata = new float[wavData->data_len];
+            ConvertPCMArrayToFloat(wavData->data, wavData->fdata, wavData->data_len);
 
 
         } else {

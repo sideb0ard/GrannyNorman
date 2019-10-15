@@ -12,6 +12,7 @@
 #include "oboe/samples/shared/Oscillator.h"
 
 #include "WavData.h"
+#include "LinkManager.h"
 
 using namespace oboe;
 
@@ -29,6 +30,7 @@ public:
 
 private:
     AudioStream *stream_;
+    LinkManager linkManager_;
     Oscillator osc_;
 
     WavData think_sample_;

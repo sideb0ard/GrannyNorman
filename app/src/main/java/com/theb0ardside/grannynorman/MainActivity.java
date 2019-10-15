@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         TextView textView = (TextView) findViewById(R.id.text_view);
-        textView.setText("JIMMMMEMEM");
+        textView.setText("++++//JIMMMMEMEM++++++++");
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);

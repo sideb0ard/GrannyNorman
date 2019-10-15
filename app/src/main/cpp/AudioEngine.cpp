@@ -25,6 +25,7 @@ void AudioEngine::start() {
 
     osc_.setAmplitude(0.5);
     osc_.setFrequency(80.);
+    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "SAMPLE RATE: %d", stream_->getSampleRate());
     osc_.setSampleRate(stream_->getSampleRate());
 
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
@@ -38,15 +39,16 @@ AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numF
 
 //    osc_.renderAudio(static_cast<float *>(audioData), numFrames);
 
+    //AudioFormat dataFormat = oboeStream->getDataFormat();
+
 
     float *data = static_cast<float *>(audioData);
-    for (int i = 0; i < numFrames; i+=2) {
+    for (int i = 0; i < numFrames; i++) {
 
 
-        data[i] = think_sample_.data[read_idx];
-        data[i+1] = think_sample_.data[read_idx];
-        read_idx+= think_sample_.num_channels;
-        if (read_idx >= think_sample_.data_len) read_idx = 0;
+        data[i] = think_sample_.fdata[read_idx++];
+
+        if (read_idx == think_sample_.data_len) read_idx = 0;
     }
 
 
@@ -67,7 +69,7 @@ void AudioEngine::LoadSamples(AAssetManager *mgr) {
     int file_size{0};
     if (think_wav) {
         file_size = AAsset_getLength(think_wav);
-        __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THINK: %d", file_size);
+        __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THUNK: %d", file_size);
     }
 
 
