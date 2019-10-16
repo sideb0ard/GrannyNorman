@@ -10,7 +10,9 @@
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/cstdint"
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/aaudio/AAudio.h"
 
+
 void AudioEngine::start() {
+
     AudioStreamBuilder b;
 
     b.setFormat(AudioFormat::Float);
@@ -23,32 +25,44 @@ void AudioEngine::start() {
 
     b.openStream(&stream_);
 
-    osc_.setAmplitude(0.5);
-    osc_.setFrequency(80.);
-    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "SAMPLE RATE: %d", stream_->getSampleRate());
-    osc_.setSampleRate(stream_->getSampleRate());
+//    osc_.setAmplitude(0.5);
+//    osc_.setFrequency(80.);
+//    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "SAMPLE RATE: %d", stream_->getSampleRate());
+//    osc_.setSampleRate(stream_->getSampleRate());
+
+    link_manager_.UpdateMicrosPerSample(stream_->getSampleRate());
 
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
-
     stream_->requestStart();
 
     active_ = true;
 
 }
 
+void AudioEngine::EmitEvent()
+{
+    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "EVENT BEEP!");
+}
+
 DataCallbackResult
-AudioEngine::onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames) {
+AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num_frames) {
+
+    link_manager_.UpdateFromAudioCallback(num_frames);
 
     if (active_) {
-        float *data = static_cast<float *>(audioData);
-        for (int i = 0; i < numFrames; i++) {
-            data[i] = think_sample_.fdata[read_idx++];
-            if (read_idx == think_sample_.data_len) read_idx = 0;
+        float *data = static_cast<float *>(audio_data);
+        for (int i = 0; i < num_frames; i++) {
+
+            data[i] = think_sample_.fdata[read_idx_++];
+            if (read_idx_ == think_sample_.data_len) read_idx_ = 0;
+
+            if (link_manager_.IsMidiTick(i)) {
+                // EmitEvent();
+            }
         }
     } else {
-        memset(audioData, 0, sizeof(float) * numFrames);
+        memset(audio_data, 0, sizeof(float) * num_frames);
     }
-
 
     return
             DataCallbackResult::Continue;
@@ -69,16 +83,11 @@ void AudioEngine::LoadSamples(AAssetManager *mgr) {
     if (think_wav) {
         file_size = AAsset_getLength(think_wav);
         __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THUNK: %d", file_size);
+
+        unsigned char const *asset_buffer = static_cast<unsigned char const *>(AAsset_getBuffer(
+                think_wav));
+        if (asset_buffer) {
+            WavDataLoadFromAssetBuffer(&think_sample_, asset_buffer);
+        }
     }
-
-
-    unsigned char const *asset_buffer = static_cast<unsigned char const *>(AAsset_getBuffer(
-            think_wav));
-    if (asset_buffer) {
-
-        WavDataLoadFromAssetBuffer(&think_sample_, asset_buffer);
-
-    }
-
-
 }

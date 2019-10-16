@@ -19,6 +19,7 @@ using namespace oboe;
 class AudioEngine : public AudioStreamCallback{
 
 public:
+
     void start();
     void tap(bool b);
 
@@ -28,15 +29,19 @@ public:
     void LoadSamples(AAssetManager *mgr);
     void setFrequency(float d);
 
+
+
 private:
     AudioStream *stream_;
-    LinkManager linkManager_;
     Oscillator osc_;
+    LinkManager link_manager_;
 
     WavData think_sample_;
-    int read_idx;
+    int read_idx_{0};
 
     bool active_{false};
+
+    void EmitEvent();
 
 };
 
