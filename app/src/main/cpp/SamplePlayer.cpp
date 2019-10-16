@@ -11,20 +11,17 @@ namespace grannynorman {
     SamplePlayer::SamplePlayer(AAssetManager *mgr, std::string sample_name) {
 
         AAsset *wav = AAssetManager_open(mgr, sample_name.c_str(), AASSET_MODE_BUFFER);
-        int file_size{0};
+
         if (wav) {
-            file_size = AAsset_getLength(wav);
-            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THUNK: %d", file_size);
 
             unsigned char const *asset_buffer = static_cast<unsigned char const *>(AAsset_getBuffer(
                     wav));
             if (asset_buffer) {
-                WavDataLoadFromAssetBuffer(&sample_data_, asset_buffer);
+                if (WavDataLoadFromAssetBuffer(&sample_data_, asset_buffer)) {
+                    active_ = true;
+                }
             }
-
-            active_ = true;
         }
-
     }
 
     double SamplePlayer::Generate() {

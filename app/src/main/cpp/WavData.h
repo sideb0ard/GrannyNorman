@@ -16,7 +16,7 @@ struct WavData {
     int precision{0};
 };
 
-void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer );
+bool WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer );
 
 // void LoadWavData()
 

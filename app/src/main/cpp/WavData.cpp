@@ -22,7 +22,7 @@ namespace {
     }
 } // namespace
 
-void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
+bool WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
 
     // Format details from:
     // http://soundfile.sapp.org/doc/WaveFormat/
@@ -133,12 +133,16 @@ void WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer) {
             wavData->fdata = new float[wavData->data_len];
             ConvertPCMArrayToFloat(wavData->data, wavData->fdata, wavData->data_len);
 
+            return true;
+
 
         } else {
             __android_log_print(ANDROID_LOG_ERROR, "WOOP", "Err! RIFF file but not a wave %s",
                                 scratch);
+            return false;
         }
     } else {
         __android_log_print(ANDROID_LOG_ERROR, "WOOP", "ERR! NOT A RIFF fike");
+        return false;
     }
 }

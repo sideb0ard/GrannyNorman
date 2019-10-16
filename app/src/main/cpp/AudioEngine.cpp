@@ -62,7 +62,6 @@ AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num
         data[i] = output_val;
 
 
-
         if (link_manager_.IsMidiTick(i)) {
             int midi_tick = link_manager_.GetMidiTick();
             if (midi_tick % PPBAR == 0) {
