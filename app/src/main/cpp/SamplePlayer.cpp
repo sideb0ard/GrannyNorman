@@ -24,6 +24,7 @@ namespace grannynorman {
 
             active_ = true;
         }
+
     }
 
     double SamplePlayer::Generate() {
