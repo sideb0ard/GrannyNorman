@@ -4,6 +4,7 @@
 
 #include <android/log.h>
 
+#include "defjams.h"
 #include "LinkManager.h"
 
 LinkManager::LinkManager() : link_{120.},
@@ -71,4 +72,8 @@ bool LinkManager::IsMidiTick(int frame_num) {
     }
 
     return false;
+}
+
+int LinkManager::GetMidiTick() {
+    return midi_tick_;
 }

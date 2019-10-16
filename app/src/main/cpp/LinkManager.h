@@ -9,9 +9,7 @@
 #include <ableton/link/HostTimeFilter.hpp>
 #include <ableton/platforms/Config.hpp>
 
-constexpr int PPQN = 960; // pulses per quarter note
-constexpr double MIDI_TICK_FRAC_OF_BEAT = 1. / PPQN;
-constexpr double DEFAULT_SAMPLE_RATE = 44100;
+
 
 class LinkManager {
 public:
@@ -25,7 +23,8 @@ public:
     void UpdateFromAudioCallback(int num_frames);
     void UpdateMicrosPerSample(int sample_rate);
     bool IsMidiTick(int frame_num);
-    void IncMidi(double beat_time);
+    int GetMidiTick();
+
 
 private:
     ableton::Link link_;
@@ -49,6 +48,9 @@ private:
     double requested_tempo_{0.};
 
     double micros_per_sample{0};
+
+private:
+    void IncMidi(double beat_time);
 
 
 

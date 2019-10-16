@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 
-add_library(native-lib SHARED native-lib.cpp AudioEngine.cpp WavData.cpp LinkManager.cpp)
+add_library(native-lib SHARED native-lib.cpp AudioEngine.cpp WavData.cpp LinkManager.cpp SoundGenerator.cpp SamplePlayer.cpp)
 
 find_library(
         log-lib log android)

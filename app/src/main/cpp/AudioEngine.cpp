@@ -3,15 +3,22 @@
 //
 
 #include <android/log.h>
+#include <memory>
+
 #include "AudioEngine.h"
+#include "defjams.h"
+
 #include "oboe/include/oboe/Definitions.h"
 #include "oboe/include/oboe/AudioStreamBuilder.h"
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/strstream"
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/cstdint"
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/aaudio/AAudio.h"
+#include "SamplePlayer.h"
 
 
-void AudioEngine::start() {
+void AudioEngine::start(AAssetManager *mgr) {
+
+    mgr_ = mgr;
 
     AudioStreamBuilder b;
 
@@ -25,22 +32,17 @@ void AudioEngine::start() {
 
     b.openStream(&stream_);
 
-//    osc_.setAmplitude(0.5);
-//    osc_.setFrequency(80.);
-//    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "SAMPLE RATE: %d", stream_->getSampleRate());
-//    osc_.setSampleRate(stream_->getSampleRate());
-
     link_manager_.UpdateMicrosPerSample(stream_->getSampleRate());
 
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
     stream_->requestStart();
 
-    active_ = true;
+    auto looper = make_unique<grannynorman::SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+    sound_generators_.emplace_back(std::move(looper));
 
 }
 
-void AudioEngine::EmitEvent()
-{
+void AudioEngine::EmitEvent() {
     __android_log_print(ANDROID_LOG_ERROR, "WOOP", "EVENT BEEP!");
 }
 
@@ -49,45 +51,30 @@ AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num
 
     link_manager_.UpdateFromAudioCallback(num_frames);
 
-    if (active_) {
-        float *data = static_cast<float *>(audio_data);
-        for (int i = 0; i < num_frames; i++) {
+    float *data = static_cast<float *>(audio_data);
+    for (int i = 0; i < num_frames; i++) {
 
-            data[i] = think_sample_.fdata[read_idx_++];
-            if (read_idx_ == think_sample_.data_len) read_idx_ = 0;
-
-            if (link_manager_.IsMidiTick(i)) {
-                // EmitEvent();
-            }
+        double output_val{0};
+        for (const auto & sg: sound_generators_){
+            output_val += sg->Generate();
         }
-    } else {
-        memset(audio_data, 0, sizeof(float) * num_frames);
+
+        data[i] = output_val;
+
+
+
+        if (link_manager_.IsMidiTick(i)) {
+            int midi_tick = link_manager_.GetMidiTick();
+            if (midi_tick % PPBAR == 0) {
+                //__android_log_print(ANDROID_LOG_ERROR, "WOOP", "START OF BAR! %d", midi_tick);
+            }
+            // EmitEvent();
+        }
     }
+
 
     return
             DataCallbackResult::Continue;
 }
 
-void AudioEngine::tap(bool b) {
-    active_ = b;
-}
 
-void AudioEngine::setFrequency(float d) {
-    osc_.setFrequency(d);
-}
-
-void AudioEngine::LoadSamples(AAssetManager *mgr) {
-
-    AAsset *think_wav = AAssetManager_open(mgr, "Sounds/thinkloop.wav", AASSET_MODE_BUFFER);
-    int file_size{0};
-    if (think_wav) {
-        file_size = AAsset_getLength(think_wav);
-        __android_log_print(ANDROID_LOG_ERROR, "WOOP", "OPENED THUNK: %d", file_size);
-
-        unsigned char const *asset_buffer = static_cast<unsigned char const *>(AAsset_getBuffer(
-                think_wav));
-        if (asset_buffer) {
-            WavDataLoadFromAssetBuffer(&think_sample_, asset_buffer);
-        }
-    }
-}

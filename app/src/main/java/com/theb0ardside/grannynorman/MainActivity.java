@@ -11,15 +11,9 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
-    private native void startEngine();
-
-    private native void tap(boolean b);
-
-    private native void setFrequency(float frequency);
-
-    private native void loadSamples(AssetManager mgr);
+    private native void startEngine(AssetManager mgr);
 
     private AssetManager mgr;
 
@@ -39,37 +33,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         TextView textView = (TextView) findViewById(R.id.text_view);
         textView.setText("++++//JIMMMMEMEM++++++++");
 
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Sensor rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
-
         mgr = getResources().getAssets();
         active = true;
 
-        loadSamples(mgr);
-        startEngine();
+        startEngine(mgr);
 
     }
 
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            active = !active;
-            tap(active);
-//        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-//            tap(false);
-        }
-        return super.onTouchEvent(event);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        setFrequency(20 + (event.values[0] * 80));
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
 }
