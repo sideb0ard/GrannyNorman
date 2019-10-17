@@ -5,7 +5,7 @@
 #include <android/log.h>
 #include "SamplePlayer.h"
 #include "WavData.h"
-#include "defjams.h"
+#include "DefJams.h"
 
 namespace grannynorman {
 

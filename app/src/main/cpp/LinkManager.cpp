@@ -4,7 +4,7 @@
 
 #include <android/log.h>
 
-#include "defjams.h"
+#include "DefJams.h"
 #include "LinkManager.h"
 
 namespace grannynorman {
@@ -78,6 +78,17 @@ namespace grannynorman {
 
     int LinkManager::GetMidiTick() {
         return midi_tick_;
+    }
+
+    LinkData LinkManager::GetStatus() {
+        session_state_ = link_.captureAppSessionState();
+        const auto time = link_.clock().micros();
+        LinkData data;
+        data.num_peers = link_.numPeers();
+        data.quantum = quantum_;
+        data.tempo = session_state_.tempo();
+        data.beat = session_state_.beatAtTime(time, quantum_);
+        data.phase = session_state_.phaseAtTime(time, quantum_);
     }
 
 } // namespace

@@ -7,7 +7,7 @@
 
 #include "AudioEngine.h"
 #include "Event.h"
-#include "defjams.h"
+#include "DefJams.h"
 
 #include "oboe/include/oboe/Definitions.h"
 #include "oboe/include/oboe/AudioStreamBuilder.h"
@@ -52,6 +52,9 @@ namespace grannynorman {
 
         if (midi_tick % PPBAR == 0) {
             ev.is_start_of_bar = true;
+            //LinkData link_data = link_manager_.GetStatus();
+           // __android_log_print(ANDROID_LOG_ERROR, "BAR", "LINK DATA peers:%d tempo:%f", link_data.num_peers, link_data.tempo);
+
         }
 
         if (midi_tick % 120 == 0) {

@@ -11,6 +11,16 @@
 
 namespace grannynorman {
 
+
+    struct LinkData
+    {
+        int num_peers;
+        double quantum;
+        double beat;
+        double tempo;
+        double phase;
+    };
+
     class LinkManager {
     public:
         LinkManager();
@@ -28,6 +38,8 @@ namespace grannynorman {
         bool IsMidiTick(int frame_num);
 
         int GetMidiTick();
+
+        LinkData GetStatus();
 
 
     private:

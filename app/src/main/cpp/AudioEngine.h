@@ -32,10 +32,6 @@ namespace grannynorman {
         virtual DataCallbackResult
         onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames);
 
-        //void LoadSamples();
-        //void setFrequency(float d);
-
-
 
     private:
         AAssetManager *mgr_;
@@ -46,11 +42,9 @@ namespace grannynorman {
 
         std::vector<std::unique_ptr<grannynorman::SoundGenerator>> sound_generators_;
 
-//    WavData think_sample_;
-//    int read_idx_{0};
-//    bool active_{false};
-
+    private:
         void EmitEvent();
+
 
     };
 
