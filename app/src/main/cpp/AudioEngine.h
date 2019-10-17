@@ -15,39 +15,45 @@
 #include "LinkManager.h"
 #include "SoundGenerator.h"
 
-using namespace oboe;
 
-class AudioEngine : public AudioStreamCallback{
+namespace grannynorman {
 
-public:
-
-    void start(AAssetManager *mgr);
-    void tap(bool b);
-
-    virtual DataCallbackResult
-    onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames);
-
-    //void LoadSamples();
-    //void setFrequency(float d);
+    using namespace oboe;
 
 
+    class AudioEngine : public AudioStreamCallback {
 
-private:
-    AAssetManager *mgr_;
-    AudioStream *stream_;
-    Oscillator osc_;
-    LinkManager link_manager_;
+    public:
+
+        void start(AAssetManager *mgr);
+
+        void tap(bool b);
+
+        virtual DataCallbackResult
+        onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames);
+
+        //void LoadSamples();
+        //void setFrequency(float d);
 
 
-    std::vector<std::unique_ptr<grannynorman::SoundGenerator>> sound_generators_;
+
+    private:
+        AAssetManager *mgr_;
+        AudioStream *stream_;
+        Oscillator osc_;
+        LinkManager link_manager_;
+
+
+        std::vector<std::unique_ptr<grannynorman::SoundGenerator>> sound_generators_;
 
 //    WavData think_sample_;
 //    int read_idx_{0};
 //    bool active_{false};
 
-    void EmitEvent();
+        void EmitEvent();
 
-};
+    };
 
+} // namespace
 
 #endif //GRANNYNORMAN_AUDIOENGINE_H

@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "AudioEngine.h"
+#include "Event.h"
 #include "defjams.h"
 
 #include "oboe/include/oboe/Definitions.h"
@@ -15,65 +16,106 @@
 #include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/aaudio/AAudio.h"
 #include "SamplePlayer.h"
 
+namespace grannynorman {
 
-void AudioEngine::start(AAssetManager *mgr) {
+    void AudioEngine::start(AAssetManager *mgr) {
 
-    mgr_ = mgr;
+        mgr_ = mgr;
 
-    AudioStreamBuilder b;
+        AudioStreamBuilder b;
 
-    b.setFormat(AudioFormat::Float);
-    b.setChannelCount(1);
+        b.setFormat(AudioFormat::Float);
+        b.setChannelCount(1);
 
-    b.setPerformanceMode(PerformanceMode::LowLatency);
-    b.setSharingMode(SharingMode::Exclusive);
+        b.setPerformanceMode(PerformanceMode::LowLatency);
+        b.setSharingMode(SharingMode::Exclusive);
 
-    b.setCallback(this);
+        b.setCallback(this);
 
-    b.openStream(&stream_);
+        b.openStream(&stream_);
 
-    link_manager_.UpdateMicrosPerSample(stream_->getSampleRate());
+        link_manager_.UpdateMicrosPerSample(stream_->getSampleRate());
 
-    stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
-    stream_->requestStart();
+        stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
+        stream_->requestStart();
 
-    auto looper = make_unique<grannynorman::SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
-    sound_generators_.emplace_back(std::move(looper));
+        auto looper = make_unique<grannynorman::SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+        sound_generators_.emplace_back(std::move(looper));
 
-}
+    }
 
-void AudioEngine::EmitEvent() {
-    __android_log_print(ANDROID_LOG_ERROR, "WOOP", "EVENT BEEP!");
-}
+    void AudioEngine::EmitEvent() {
 
-DataCallbackResult
-AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num_frames) {
+        int midi_tick = link_manager_.GetMidiTick();
 
-    link_manager_.UpdateFromAudioCallback(num_frames);
+        Event ev(EventType::MIDI_TICK, midi_tick);
 
-    float *data = static_cast<float *>(audio_data);
-    for (int i = 0; i < num_frames; i++) {
-
-        double output_val{0};
-        for (const auto & sg: sound_generators_){
-            output_val += sg->Generate();
+        if (midi_tick % PPBAR == 0) {
+            ev.is_start_of_bar = true;
         }
 
-        data[i] = output_val;
+        if (midi_tick % 120 == 0) {
+            ev.is_thirtysecond = true;
 
+            if (midi_tick % 240 == 0) {
+                ev.is_sixteenth = true;
 
-        if (link_manager_.IsMidiTick(i)) {
-            int midi_tick = link_manager_.GetMidiTick();
-            if (midi_tick % PPBAR == 0) {
-                //__android_log_print(ANDROID_LOG_ERROR, "WOOP", "START OF BAR! %d", midi_tick);
+                if (midi_tick % 480 == 0) {
+                    ev.is_eighth = true;
+
+                    if (midi_tick % PPQN == 0)
+                        ev.is_quarter = true;
+                }
             }
-            // EmitEvent();
+        }
+
+
+        if (midi_tick % 160 == 0) {
+            ev.is_twentyfourth = true;
+
+            if (midi_tick % 320 == 0) {
+                ev.is_twelth = true;
+
+                if (midi_tick % 640 == 0) {
+                    ev.is_sixth = true;
+
+                    if (midi_tick % 1280 == 0)
+                        ev.is_third = true;
+                }
+            }
+        }
+
+
+        for (const auto &sg: sound_generators_) {
+            sg->EventNotify(ev);
         }
     }
 
+    DataCallbackResult
+    AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num_frames) {
 
-    return
-            DataCallbackResult::Continue;
-}
+        link_manager_.UpdateFromAudioCallback(num_frames);
+
+        float *data = static_cast<float *>(audio_data);
+        for (int i = 0; i < num_frames; i++) {
+
+            double output_val{0};
+            for (const auto &sg: sound_generators_) {
+                output_val += sg->Generate();
+            }
+
+            data[i] = output_val;
 
 
+            if (link_manager_.IsMidiTick(i)) {
+                EmitEvent();
+
+            }
+        }
+
+
+        return
+                DataCallbackResult::Continue;
+    }
+
+} // namespace

@@ -5,6 +5,7 @@
 #include <android/log.h>
 #include "SamplePlayer.h"
 #include "WavData.h"
+#include "defjams.h"
 
 namespace grannynorman {
 
@@ -34,6 +35,28 @@ namespace grannynorman {
         }
 
         return return_val;
+    }
+
+    void SamplePlayer::EventNotify(Event ev) {
+
+
+
+        int relative_midi_tick = ev.midi_tick % PPBAR;
+        double percent_of_loop = (double)relative_midi_tick / PPBAR;
+        double new_read_idx = percent_of_loop * sample_data_.data_len;
+        if (percent_of_loop < 0 || percent_of_loop > 1) {
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "YOUCH!! REL MIDI:%d PCT:%f NEW READ IDX:%f",
+                                relative_midi_tick, percent_of_loop,
+                                new_read_idx);
+        }
+        read_idx_ = new_read_idx;
+
+        if (ev.is_start_of_bar) {
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP", "START OF LOOPO:%d READ IDX:%d",
+                                ev.midi_tick % PPBAR, read_idx_);
+        }
+
+
     }
 
 } // namespace grannynorman

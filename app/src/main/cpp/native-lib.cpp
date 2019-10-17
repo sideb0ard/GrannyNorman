@@ -5,7 +5,7 @@
 #include "AudioEngine.h"
 
 
-AudioEngine engine;
+grannynorman::AudioEngine engine;
 
 
 extern "C" {

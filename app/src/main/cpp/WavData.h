@@ -7,17 +7,22 @@
 
 #include <cstdint>
 
-struct WavData {
-    int16_t *data = nullptr;
-    float *fdata = nullptr;
-    unsigned long data_len{0};
-    int num_channels{0};
-    int sample_rate{0};
-    int precision{0};
-};
+namespace grannynorman {
 
-bool WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer );
+
+    struct WavData {
+        int16_t *data = nullptr;
+        float *fdata = nullptr;
+        unsigned long data_len{0};
+        int num_channels{0};
+        int sample_rate{0};
+        int precision{0};
+    };
+
+    bool WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer);
 
 // void LoadWavData()
+
+} // namespace
 
 #endif //GRANNYNORMAN_WAVDATA_H
