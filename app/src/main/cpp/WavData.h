@@ -7,7 +7,6 @@
 
 #include <cstdint>
 
-namespace grannynorman {
 
 
     struct WavData {
@@ -21,8 +20,6 @@ namespace grannynorman {
 
     bool WavDataLoadFromAssetBuffer(WavData *wavData, unsigned char const *buffer);
 
-// void LoadWavData()
 
-} // namespace
 
-#endif //GRANNYNORMAN_WAVDATA_H
+#endif // GRANNYNORMAN_WAVDATA_H

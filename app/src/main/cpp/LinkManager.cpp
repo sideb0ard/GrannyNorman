@@ -7,13 +7,20 @@
 #include "DefJams.h"
 #include "LinkManager.h"
 
-namespace grannynorman {
 
-    LinkManager::LinkManager() : link_{120.},
+
+
+    LinkManager::LinkManager() : link_{DEFAULT_BPM},
                                  session_state_{link_.captureAudioSessionState()},
-                                 micros_per_sample{1e6 / DEFAULT_SAMPLE_RATE} {
+                                 micros_per_sample{1e6 / DEFAULT_SAMPLE_RATE}, bpm_{DEFAULT_BPM},
+                                 frames_per_midi_tick_{
+                                         (int)(60. / DEFAULT_BPM * DEFAULT_SAMPLE_RATE / PPQN)},
+                                 ms_per_midi_tick_{60000. / DEFAULT_BPM * PPQN},
+                                 loop_len_in_frames_{frames_per_midi_tick_ * PPBAR},
+                                 loop_len_in_ticks_{PPBAR} {
         link_.enable(true);
         __android_log_print(ANDROID_LOG_ERROR, "WOOP", "LINK ENABLED BOO YA:");
+
     }
 
     void LinkManager::UpdateFromAudioCallback(int num_frames) {
@@ -22,12 +29,13 @@ namespace grannynorman {
                 host_time_filter_.sampleTimeToHostTime(num_frames);
 
         buffer_begin_at_output_ =
-                host_time + output_latency_;
+                host_time; // + output_latency_;
 
         frame_counter_ += num_frames;
 
 
         session_state_ = link_.captureAudioSessionState();
+
         if (reset_beat_time_) {
             session_state_.requestBeatAtTime(0, host_time, quantum_);
             reset_beat_time_ = false;
@@ -39,7 +47,6 @@ namespace grannynorman {
         }
 
         link_.commitAudioSessionState(session_state_);
-
     }
 
     void LinkManager::UpdateMicrosPerSample(int sample_rate) {
@@ -80,15 +87,28 @@ namespace grannynorman {
         return midi_tick_;
     }
 
-    LinkData LinkManager::GetStatus() {
-        session_state_ = link_.captureAppSessionState();
-        const auto time = link_.clock().micros();
-        LinkData data;
-        data.num_peers = link_.numPeers();
-        data.quantum = quantum_;
-        data.tempo = session_state_.tempo();
-        data.beat = session_state_.beatAtTime(time, quantum_);
-        data.phase = session_state_.phaseAtTime(time, quantum_);
+    TimingData LinkManager::GetTimingData() {
+        TimingData data;
+        data.sample_rate = sample_rate_;
+        data.frame_tick = frame_counter_;
+        data.midi_tick = midi_tick_;
+
+        data.sixteenth_note_tick = sixteenth_note_tick_;
+
+        data.frames_per_midi_tick = frames_per_midi_tick_;
+        data.ms_per_midi_tick = ms_per_midi_tick_;
+
+        data.loop_len_in_frames = loop_len_in_frames_;
+        data.loop_len_in_ticks =
+                loop_len_in_ticks_;
+
+        return data;
+
     }
 
-} // namespace
+    void LinkManager::SetSampleRate(int sample_rate) {
+        sample_rate_ = sample_rate;
+        UpdateMicrosPerSample(sample_rate);
+    }
+
+

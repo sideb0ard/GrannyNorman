@@ -16,12 +16,8 @@
 #include "SoundGenerator.h"
 
 
-namespace grannynorman {
 
-    using namespace oboe;
-
-
-    class AudioEngine : public AudioStreamCallback {
+    class AudioEngine : public oboe::AudioStreamCallback {
 
     public:
 
@@ -29,18 +25,18 @@ namespace grannynorman {
 
         void tap(bool b);
 
-        virtual DataCallbackResult
-        onAudioReady(AudioStream *oboeStream, void *audioData, int32_t numFrames);
+        oboe::DataCallbackResult
+        onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;
 
 
     private:
         AAssetManager *mgr_;
-        AudioStream *stream_;
+        oboe::AudioStream *stream_;
         Oscillator osc_;
         LinkManager link_manager_;
 
 
-        std::vector<std::unique_ptr<grannynorman::SoundGenerator>> sound_generators_;
+        std::vector<std::unique_ptr<SoundGenerator>> sound_generators_;
 
     private:
         void EmitEvent();
@@ -48,6 +44,5 @@ namespace grannynorman {
 
     };
 
-} // namespace
 
 #endif //GRANNYNORMAN_AUDIOENGINE_H

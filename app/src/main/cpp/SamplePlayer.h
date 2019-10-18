@@ -8,12 +8,15 @@
 #include <android/asset_manager.h>
 #include <string>
 #include <array>
-#include "SoundGenerator.h"
-#include "WavData.h"
+
+#include "DefJams.h"
 #include "EnvelopeGenerator.h"
+#include "Event.h"
+#include "SoundGenerator.h"
+#include "TimingData.h"
+#include "WavData.h"
 
 
-namespace grannynorman {
 
     constexpr int max_grains = 1000;
 
@@ -29,6 +32,7 @@ namespace grannynorman {
     };
 
     struct SoundGrainInitParams {
+        int sample_rate;
         int dur;
         int starting_idx;
         int attack_pct;
@@ -40,14 +44,12 @@ namespace grannynorman {
         bool debug;
     };
 
-    class SoundGrain {
+    struct SoundGrain {
 
-    public:
         SoundGrain() = default;
 
         SoundGrain(SoundGrainInitParams params);
 
-    private:
         int grain_len_frames;
         int grain_counter_frames;
         int audiobuffer_num;
@@ -77,9 +79,9 @@ namespace grannynorman {
 
     public:
 
-        SamplePlayer(AAssetManager *mgr, std::string sample_name);
+        SamplePlayer(AAssetManager *mgr, std::string const &sample_name);
 
-        double Generate() override;
+        StereoValue Generate(TimingData timing_data) override;
 
         void EventNotify(Event ev) override;
 
@@ -99,17 +101,20 @@ namespace grannynorman {
         int quasi_grain_fudge_{220};     // random variation from length of grain
         int grain_duration_ms_{100};
         int grains_per_sec_{30};
+        bool reverse_mode_{false};
+        bool debug_{false};
+        int degrade_by_{0};
         bool density_duration_sync_{true}; // keep duration and per_sec aligned
         double fill_factor_{3};         // used for density_duration_sync
         double grain_pitch_{1};
 
-        int num_grains_per_looplen_;
+        int num_grains_per_looplen_{0};
         SELECTION_MODE selection_mode_{SELECTION_MODE::STATIC};
 
         double envelope_taper_ratio_{0.5}; // 0.0...1.0
 
 
-        int last_grain_launched_sample_time_{0};
+        int last_grain_launched_frame_tick_{0};
         int grain_attack_time_pct_{15};
         int grain_release_time_pct_{15};
 
@@ -117,9 +122,18 @@ namespace grannynorman {
         double loop_len_{1};        // bars
         int loop_counter_{-1};
 
+    private:
+        int CalculateGrainSpacing(TimingData timing_data);
+
+        int GetAvailableGrainNumber();
+
+        void SetGrain(SoundGrain &grain, SoundGrainInitParams params);
+
+        StereoValue SoundGrainGenerate(int i);
+
     };
 
-}
+
 
 
 #endif //GRANNYNORMAN_SAMPLEPLAYER_H

@@ -8,38 +8,30 @@
 #include <ableton/Link.hpp>
 #include <ableton/link/HostTimeFilter.hpp>
 #include <ableton/platforms/Config.hpp>
+#include "TimingData.h"
 
-namespace grannynorman {
 
 
-    struct LinkData
-    {
-        int num_peers;
-        double quantum;
-        double beat;
-        double tempo;
-        double phase;
-    };
 
     class LinkManager {
     public:
         LinkManager();
 
-        double getTempo();
-
-        double getPhase();
-
-        void enable();
-
         void UpdateFromAudioCallback(int num_frames);
-
-        void UpdateMicrosPerSample(int sample_rate);
 
         bool IsMidiTick(int frame_num);
 
+        TimingData GetTimingData();
+
         int GetMidiTick();
 
-        LinkData GetStatus();
+        void SetSampleRate(int sample_rate);
+
+
+    private:
+        void IncMidi(double beat_time);
+
+        void UpdateMicrosPerSample(int sample_rate);
 
 
     private:
@@ -54,23 +46,40 @@ namespace grannynorman {
 
         bool reset_beat_time_{false};
 
-        int frame_counter_{0};
-
-        int midi_tick_{0};
-        bool is_midi_tick_{false};
-        double time_of_next_midi_tick_;
-
         double quantum_{4.};
         double requested_tempo_{0.};
 
         double micros_per_sample{0};
 
-    private:
-        void IncMidi(double beat_time);
+        int frame_counter_{0};
+
+        int midi_tick_{0};
+        double time_of_next_midi_tick_{0};
+
+        int sixteenth_note_tick_{0};
+
+        bool is_midi_tick_{false};
+        bool is_thirtysecond_{false};
+        bool is_twentyfourth_{false};
+        bool is_sixteenth_{false};
+        bool is_twelth_{false};
+        bool is_eighth_{false};
+        bool is_sixth_{false};
+        bool is_quarter_{false};
+        bool is_third_{false};
+        bool is_start_of_bar_{false};
+
+        double bpm_{0};
+        int sample_rate_{0};
+
+        int frames_per_midi_tick_{0};
+        double ms_per_midi_tick_{0};
+
+        int loop_len_in_frames_{0};
+        int loop_len_in_ticks_{0};
 
 
     };
 
-} // namespace
 
 #endif //GRANNYNORMAN_LINKMANAGER_H

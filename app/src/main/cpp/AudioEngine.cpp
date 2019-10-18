@@ -11,35 +11,32 @@
 
 #include "oboe/include/oboe/Definitions.h"
 #include "oboe/include/oboe/AudioStreamBuilder.h"
-#include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/strstream"
-#include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/c++/v1/cstdint"
-#include "../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/aaudio/AAudio.h"
-#include "SamplePlayer.h"
 
-namespace grannynorman {
+#include "SamplePlayer.h"
 
     void AudioEngine::start(AAssetManager *mgr) {
 
         mgr_ = mgr;
 
-        AudioStreamBuilder b;
+        oboe::AudioStreamBuilder b;
 
-        b.setFormat(AudioFormat::Float);
+        b.setFormat(oboe::AudioFormat::Float);
         b.setChannelCount(1);
 
-        b.setPerformanceMode(PerformanceMode::LowLatency);
-        b.setSharingMode(SharingMode::Exclusive);
+        b.setPerformanceMode(oboe::PerformanceMode::LowLatency);
+        b.setSharingMode(oboe::SharingMode::Exclusive);
 
         b.setCallback(this);
 
         b.openStream(&stream_);
 
-        link_manager_.UpdateMicrosPerSample(stream_->getSampleRate());
+        int sample_rate = stream_->getSampleRate();
+        link_manager_.SetSampleRate(sample_rate);
 
         stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
         stream_->requestStart();
 
-        auto looper = make_unique<grannynorman::SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+        auto looper = make_unique<SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
         sound_generators_.emplace_back(std::move(looper));
 
     }
@@ -47,14 +44,10 @@ namespace grannynorman {
     void AudioEngine::EmitEvent() {
 
         int midi_tick = link_manager_.GetMidiTick();
-
-        Event ev(EventType::MIDI_TICK, midi_tick);
+        Event ev(midi_tick);
 
         if (midi_tick % PPBAR == 0) {
             ev.is_start_of_bar = true;
-            //LinkData link_data = link_manager_.GetStatus();
-           // __android_log_print(ANDROID_LOG_ERROR, "BAR", "LINK DATA peers:%d tempo:%f", link_data.num_peers, link_data.tempo);
-
         }
 
         if (midi_tick % 120 == 0) {
@@ -94,17 +87,21 @@ namespace grannynorman {
         }
     }
 
-    DataCallbackResult
-    AudioEngine::onAudioReady(AudioStream *oboeStream, void *audio_data, int32_t num_frames) {
+    oboe::DataCallbackResult
+    AudioEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audio_data, int32_t num_frames) {
 
         link_manager_.UpdateFromAudioCallback(num_frames);
 
-        float *data = static_cast<float *>(audio_data);
+        TimingData timing_data = link_manager_.GetTimingData();
+
+        auto data = static_cast<float *>(audio_data);
         for (int i = 0; i < num_frames; i++) {
 
             double output_val{0};
             for (const auto &sg: sound_generators_) {
-                output_val += sg->Generate();
+                StereoValue val = sg->Generate(timing_data);
+                // TODO add Stereo Output
+                output_val += val.first;
             }
 
             data[i] = output_val;
@@ -118,7 +115,5 @@ namespace grannynorman {
 
 
         return
-                DataCallbackResult::Continue;
+                oboe::DataCallbackResult::Continue;
     }
-
-} // namespace

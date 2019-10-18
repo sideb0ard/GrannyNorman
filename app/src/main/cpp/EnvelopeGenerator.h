@@ -5,7 +5,7 @@
 #ifndef GRANNYNORMAN_ENVELOPEGENERATOR_H
 #define GRANNYNORMAN_ENVELOPEGENERATOR_H
 
-namespace grannysmith {
+
 
     enum class Mode {
         ANALOG,
@@ -64,7 +64,6 @@ namespace grannysmith {
         State state_;
     };
 
-} // namespace
 
 
 #endif //GRANNYNORMAN_ENVELOPEGENERATOR_H

@@ -5,8 +5,3 @@
 #include "EnvelopeGenerator.h"
 
 
-namespace grannysmith {
-
-
-
-} // namespace
