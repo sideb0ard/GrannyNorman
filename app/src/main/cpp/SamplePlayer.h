@@ -85,11 +85,12 @@
 
         void EventNotify(Event ev) override;
 
+        void SetParam(std::string val_name, double val) override ;
+
 
     private:
         WavData sample_data_;
         int read_idx_{0};
-        bool active_{false};
 
         int num_active_grains_{0};
         int highest_grain_num_{0};
@@ -97,10 +98,11 @@
 
         std::array<SoundGrain, max_grains> grains_{};
 
-        int granular_spray_frames_{441}; // random off-set from starting read_idx
-        int quasi_grain_fudge_{220};     // random variation from length of grain
+        int granular_spray_frames_{0}; // random off-set from starting read_idx
+        int quasi_grain_fudge_{0};     // random variation from length of grain
         int grain_duration_ms_{100};
         int grains_per_sec_{30};
+
         bool reverse_mode_{false};
         bool debug_{false};
         int degrade_by_{0};
@@ -130,6 +132,11 @@
         void SetGrain(SoundGrain &grain, SoundGrainInitParams params);
 
         StereoValue SoundGrainGenerate(int i);
+
+        void SetGrainsPerSecond(double val);
+        void SetGrainDuration(double val);
+        void SetGrainFudge(double val);
+        void SetGrainSpray(double val);
 
     };
 

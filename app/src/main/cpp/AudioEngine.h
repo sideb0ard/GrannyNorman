@@ -21,9 +21,12 @@
 
     public:
 
-        void start(AAssetManager *mgr);
+        void Start(AAssetManager *mgr);
 
-        void tap(bool b);
+        void SetGrainsPerSecond(float val);
+        void SetGrainDuration(float val);
+        void SetGrainSpray(float val);
+        void SetGrainFudge(float val);
 
         oboe::DataCallbackResult
         onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;

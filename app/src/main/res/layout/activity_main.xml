@@ -6,9 +6,84 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <SeekBar
+        android:id="@+id/seekBar2"
+        android:layout_width="210dp"
+        android:layout_height="72dp"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="108dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
 
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="211dp"
+        android:layout_height="62dp"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="96dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seekBar3"
+        android:layout_width="199dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="120dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar2" />
+
+    <SeekBar
+        android:id="@+id/seekBar4"
+        android:layout_width="214dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="84dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar3" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="128dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginBottom="28dp"
+        android:ems="10"
+        android:hint="@string/fudge"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/editText2"
+        android:layout_width="137dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="84dp"
+        android:ems="10"
+        android:hint="@string/grain_size"
+        android:inputType="textPersonName"
+        android:text="@string/grain_size"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="205dp" />
+
+    <EditText
+        android:id="@+id/editText3"
+        android:layout_width="179dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="84dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/grains_per_second"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="404dp" />
+
+    <EditText
+        android:id="@+id/editText4"
+        android:layout_width="129dp"
+        android:layout_height="27dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/spray"
+        tools:layout_editor_absoluteX="79dp"
+        tools:layout_editor_absoluteY="539dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

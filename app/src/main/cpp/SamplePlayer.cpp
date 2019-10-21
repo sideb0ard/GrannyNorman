@@ -50,12 +50,16 @@ SamplePlayer::SamplePlayer(AAssetManager *mgr, std::string const &sample_name) {
 
 StereoValue SamplePlayer::Generate(TimingData timing_data) {
 
+    if (!started_)
+        return std::make_pair<double, double>(0, 0);
+
     // STEP 1 - calculate if we should launch a new grain
     int spacing = CalculateGrainSpacing(timing_data);
     if (timing_data.frame_tick >
         last_grain_launched_frame_tick_ + spacing) // new grain time
     {
         last_grain_launched_frame_tick_ = timing_data.frame_tick;
+
         cur_grain_num_ = GetAvailableGrainNumber();
 
         int duration = grain_duration_ms_ * 44.1;
@@ -87,8 +91,7 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
                 .debug = debug_};
 
 
-
-            SetGrain(grains_[cur_grain_num_], params);
+        SetGrain(grains_[cur_grain_num_], params);
         // num_active_grains_ = CountActiveGrains();
     }
 
@@ -96,12 +99,12 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
 
     double left_accumulator = 0, right_accumulator = 0;
 
-        for (int i = 0; i < highest_grain_num_; i++) {
+    for (int i = 0; i < highest_grain_num_; i++) {
 
-            StereoValue tmp = SoundGrainGenerate(i);
-            left_accumulator += tmp.first;
-            right_accumulator += tmp.second;
-        }
+        StereoValue tmp = SoundGrainGenerate(i);
+        left_accumulator += tmp.first;
+        right_accumulator += tmp.second;
+    }
 
     return std::make_pair(left_accumulator, right_accumulator);
 }
@@ -118,7 +121,8 @@ void SamplePlayer::EventNotify(Event ev) {
     }
     read_idx_ = new_read_idx;
 
-    if (ev.is_start_of_bar) {
+    if (ev.is_start_of_bar && !started_) {
+        started_ = true;
         __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                             "START OF LOOPO:%d READ IDX:%d",
                             ev.midi_tick % PPBAR, read_idx_);
@@ -152,38 +156,38 @@ int SamplePlayer::GetAvailableGrainNumber() {
 }
 
 void SamplePlayer::SetGrain(SoundGrain &grain, SoundGrainInitParams params) {
-        grain.audiobuffer_start_idx = params.starting_idx;
-        grain.grain_len_frames = params.dur;
-        grain.grain_counter_frames = 0;
-        grain.attack_time_pct = params.attack_pct;
-        grain.release_time_pct = params.release_pct;
-        grain.audiobuffer_num_channels = params.num_channels;
-        grain.degrade_by = params.degrade_by;
-        grain.debug = params.debug;
+    grain.audiobuffer_start_idx = params.starting_idx;
+    grain.grain_len_frames = params.dur;
+    grain.grain_counter_frames = 0;
+    grain.attack_time_pct = params.attack_pct;
+    grain.release_time_pct = params.release_pct;
+    grain.audiobuffer_num_channels = params.num_channels;
+    grain.degrade_by = params.degrade_by;
+    grain.debug = params.debug;
 
-        grain.audiobuffer_cur_pos = params.starting_idx;
-        grain.incr = params.pitch;
+    grain.audiobuffer_cur_pos = params.starting_idx;
+    grain.incr = params.pitch;
 
-        grain.reverse_mode = params.reverse_mode;
-        if (params.reverse_mode) {
-            grain.audiobuffer_cur_pos =
-                    params.starting_idx + (params.dur * params.num_channels) - 1;
-            grain.incr = -1.0 * params.pitch;
-        }
+    grain.reverse_mode = params.reverse_mode;
+    if (params.reverse_mode) {
+        grain.audiobuffer_cur_pos =
+                params.starting_idx + (params.dur * params.num_channels) - 1;
+        grain.incr = -1.0 * params.pitch;
+    }
 
-        grain.audiobuffer_cur_pos = params.starting_idx;
-        grain.incr = params.pitch;
-        grain.attack_time_samples = params.dur / 100. * params.attack_pct;
-        grain.release_time_samples = params.dur / 100. * params.release_pct;
+    grain.audiobuffer_cur_pos = params.starting_idx;
+    grain.incr = params.pitch;
+    grain.attack_time_samples = params.dur / 100. * params.attack_pct;
+    grain.release_time_samples = params.dur / 100. * params.release_pct;
 
-        // somewhat crappy envelope
-        grain.amp = 0;
-        double rdur = 1.0 / params.dur;
-        double rdur2 = rdur * rdur;
-        grain.slope = 4.0 * 1.0 * (rdur - rdur2);
-        grain.curve = -8.0 * 1.0 * rdur2;
+    // somewhat crappy envelope
+    grain.amp = 0;
+    double rdur = 1.0 / params.dur;
+    double rdur2 = rdur * rdur;
+    grain.slope = 4.0 * 1.0 * (rdur - rdur2);
+    grain.curve = -8.0 * 1.0 * rdur2;
 
-        grain.active = true;
+    grain.active = true;
 }
 
 std::pair<double, double> SamplePlayer::SoundGrainGenerate(int i) {
@@ -242,3 +246,31 @@ std::pair<double, double> SamplePlayer::SoundGrainGenerate(int i) {
 }
 
 
+void SamplePlayer::SetParam(std::string val_name, double val) {
+
+    if (val_name.compare("grains_per_second") == 0) {
+        SetGrainsPerSecond(val);
+    } else if (val_name.compare("grain_duration") == 0) {
+        SetGrainDuration(val);
+    } else if (val_name.compare("grain_fudge") == 0) {
+        SetGrainFudge(val);
+    } else if (val_name.compare("grain_duration") == 0) {
+        SetGrainSpray(val);
+    }
+}
+
+void SamplePlayer::SetGrainsPerSecond(double val) {
+    grains_per_sec_ = val;
+}
+
+void SamplePlayer::SetGrainDuration(double val) {
+    grain_duration_ms_ = val;
+}
+
+void SamplePlayer::SetGrainFudge(double val) {
+    quasi_grain_fudge_ = val;
+}
+
+void SamplePlayer::SetGrainSpray(double val) {
+    granular_spray_frames_ = val;
+}
