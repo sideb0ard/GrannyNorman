@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GrannyNorman</string>
     <string name="grains_per_second">Grains Per Second</string>
-    <string name="grain_size">Grain Size</string>
+    <string name="grain_duration">Grain Duration</string>
     <string name="spray">Spray</string>
     <string name="fudge">Fudge</string>
 </resources>

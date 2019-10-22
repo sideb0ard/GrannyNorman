@@ -3,6 +3,7 @@ package com.theb0ardside.grannynorman;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,9 +24,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean active;
 
     SeekBar seekbar_grains_per_second; // 10 - 200?
+    private TextView grains_per_second_value;
     SeekBar seekbar_grain_duration; // ms. 10ms - 200?
+    private TextView grain_duration_value;
     SeekBar seekbar_spray; // random start offset from playback idx in ms
+    private TextView spray_value;
     SeekBar seekbar_fudge; // random diff added to duration
+    private TextView fudge_value;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
         seekbar_grains_per_second
                 = (SeekBar) findViewById(R.id.seekBar);
+        grains_per_second_value = (TextView) findViewById(R.id.gps_value);
 
         seekbar_grains_per_second
                 .setOnSeekBarChangeListener(
@@ -56,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 setGrainsPerSecond(val);
+                                grains_per_second_value.setText(String.valueOf(val));
                             }
 
                             @Override
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                         });
 
         seekbar_grain_duration = (SeekBar) findViewById(R.id.seekBar2);
+        grain_duration_value = (TextView) findViewById(R.id.textView4);
         seekbar_grain_duration
                 .setOnSeekBarChangeListener(
                         new SeekBar
@@ -81,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 setGrainDuration(val);
+                                grain_duration_value.setText(String.valueOf(val));
                             }
 
                             @Override
@@ -93,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                         });
 
         seekbar_spray = (SeekBar) findViewById(R.id.seekBar3);
+        spray_value = (TextView) findViewById(R.id.textView6);
         seekbar_spray
                 .setOnSeekBarChangeListener(
                         new SeekBar
@@ -106,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 setGrainSpray(val);
+                                spray_value.setText(String.valueOf(val));
                             }
 
                             @Override
@@ -118,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                         });
 
         seekbar_fudge = (SeekBar) findViewById(R.id.seekBar4);
+        fudge_value = (TextView) findViewById(R.id.textView8);
         seekbar_fudge
                 .setOnSeekBarChangeListener(
                         new SeekBar
@@ -131,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 setGrainFudge(val);
+                                fudge_value.setText(String.valueOf(val));
+
                             }
 
                             @Override
