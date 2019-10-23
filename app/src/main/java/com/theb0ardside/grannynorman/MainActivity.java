@@ -11,24 +11,34 @@ public class MainActivity extends AppCompatActivity {
 
     private native void startEngine(AssetManager mgr);
 
-    private native void setGrainsPerSecond(float frequency);
+    private native void setGrainsPerSecond(float val);
 
-    private native void setGrainDuration(float frequency);
+    private native void setGrainDuration(float val);
 
-    private native void setGrainSpray(float frequency);
+    private native void setGrainSpray(float val);
 
-    private native void setGrainFudge(float frequency);
+    private native void setGrainFudge(float val);
+
+    private native void setGranularMode(int mode);
+
+    private native void setGrainIndex(int val);
 
     private AssetManager mgr;
 
     private boolean active;
 
+    SeekBar seekbar_grain_index; // 0-100
+    private TextView grain_index_value;
+
     SeekBar seekbar_grains_per_second; // 10 - 200?
     private TextView grains_per_second_value;
+
     SeekBar seekbar_grain_duration; // ms. 10ms - 200?
     private TextView grain_duration_value;
+
     SeekBar seekbar_spray; // random start offset from playback idx in ms
     private TextView spray_value;
+
     SeekBar seekbar_fudge; // random diff added to duration
     private TextView fudge_value;
 
@@ -44,6 +54,35 @@ public class MainActivity extends AppCompatActivity {
 
         mgr = getResources().getAssets();
         active = true;
+
+        seekbar_grain_index
+                = (SeekBar) findViewById(R.id.seekBar5);
+        grain_index_value = (TextView) findViewById(R.id.textView9);
+
+        seekbar_grain_index
+                .setOnSeekBarChangeListener(
+                        new SeekBar
+                                .OnSeekBarChangeListener() {
+
+                            // When the progress value has changed
+                            @Override
+                            public void onProgressChanged(
+                                    SeekBar seekBar,
+                                    int val,
+                                    boolean fromUser) {
+
+                                setGrainIndex(val);
+                                grain_index_value.setText(String.valueOf(val));
+                            }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+                            }
+                        });
 
         seekbar_grains_per_second
                 = (SeekBar) findViewById(R.id.seekBar);

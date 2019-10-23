@@ -111,15 +111,17 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
 
 void SamplePlayer::EventNotify(Event ev) {
 
-    int relative_midi_tick = ev.midi_tick % PPBAR;
-    double percent_of_loop = (double) relative_midi_tick / PPBAR;
-    double new_read_idx = percent_of_loop * sample_data_.data_len;
-    if (percent_of_loop < 0 || percent_of_loop > 1) {
-        __android_log_print(ANDROID_LOG_ERROR, "WOOP",
-                            "YOUCH!! REL MIDI:%d PCT:%f NEW READ IDX:%f",
-                            relative_midi_tick, percent_of_loop, new_read_idx);
+    if (loop_mode_ == LOOP_MODE::LOOP) {
+        int relative_midi_tick = ev.midi_tick % PPBAR;
+        double percent_of_loop = (double) relative_midi_tick / PPBAR;
+        double new_read_idx = percent_of_loop * sample_data_.data_len;
+        if (percent_of_loop < 0 || percent_of_loop > 1) {
+            __android_log_print(ANDROID_LOG_ERROR, "WOOP",
+                                "YOUCH!! REL MIDI:%d PCT:%f NEW READ IDX:%f",
+                                relative_midi_tick, percent_of_loop, new_read_idx);
+        }
+        read_idx_ = new_read_idx;
     }
-    read_idx_ = new_read_idx;
 
     if (ev.is_start_of_bar && !started_) {
         started_ = true;
@@ -256,6 +258,10 @@ void SamplePlayer::SetParam(std::string val_name, double val) {
         SetGrainFudge(val);
     } else if (val_name.compare("grain_duration") == 0) {
         SetGrainSpray(val);
+    } else if (val_name.compare("grain_index") == 0) {
+        SetGrainIndex(val);
+    } else if (val_name.compare("granular_mode") == 0) {
+        SetGranularMode(val);
     }
 }
 
@@ -273,4 +279,18 @@ void SamplePlayer::SetGrainFudge(double val) {
 
 void SamplePlayer::SetGrainSpray(double val) {
     granular_spray_frames_ = val;
+}
+
+void SamplePlayer::SetGrainIndex(int val) {
+    if (val >= 0 && val <= 100) {
+        double pos = sample_data_.data_len / 100. * val;
+        read_idx_ = pos;
+    }
+
+}
+
+void SamplePlayer::SetGranularMode(int val) {
+
+    // loop_mode_ = val;
+
 }

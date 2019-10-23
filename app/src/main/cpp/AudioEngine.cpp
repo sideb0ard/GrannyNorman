@@ -36,7 +36,7 @@ void AudioEngine::Start(AAssetManager *mgr) {
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
     stream_->requestStart();
 
-    auto looper = make_unique<SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+    auto looper = make_unique<SamplePlayer>(mgr_, "Sounds/pad.wav");
     sound_generators_.emplace_back(std::move(looper));
 
 }
@@ -149,4 +149,12 @@ void AudioEngine::SetGrainFudge(float val){
     sound_generators_[0]->SetParam("grain_fudge", val);
 }
 
+void AudioEngine::SetGrainIndex(int val)
+{
+    sound_generators_[0]->SetParam("grain_index", val);
+}
 
+void AudioEngine::SetGranularMode(int val)
+{
+    sound_generators_[0]->SetParam("granular_mode", val);
+}

@@ -27,6 +27,8 @@
         void SetGrainDuration(float val);
         void SetGrainSpray(float val);
         void SetGrainFudge(float val);
+        void SetGrainIndex(int val);
+        void SetGranularMode(int val);
 
         oboe::DataCallbackResult
         onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;

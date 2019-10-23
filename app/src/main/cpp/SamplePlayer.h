@@ -120,7 +120,7 @@
         int grain_attack_time_pct_{15};
         int grain_release_time_pct_{15};
 
-        LOOP_MODE loop_mode_{LOOP_MODE::LOOP}; // enums above - LOOP, STEP, STATIC
+        LOOP_MODE loop_mode_{LOOP_MODE::SMUDGE}; // enums above - LOOP, SMUDGE, STATIC
         double loop_len_{1};        // bars
         int loop_counter_{-1};
 
@@ -137,6 +137,8 @@
         void SetGrainDuration(double val);
         void SetGrainFudge(double val);
         void SetGrainSpray(double val);
+        void SetGrainIndex(int val);
+        void SetGranularMode(int val);
 
     };
 

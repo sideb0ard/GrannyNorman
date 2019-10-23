@@ -44,6 +44,17 @@ Java_com_theb0ardside_grannynorman_MainActivity_setGrainFudge(JNIEnv *env, jobje
     engine.SetGrainFudge(val);
 }
 
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_setGranularMode(JNIEnv *env, jobject instance, jint val)
+{
+    engine.SetGranularMode(val);
+}
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_setGrainIndex(JNIEnv *env, jobject instance, jint val)
+{
+    engine.SetGrainIndex(val);
+}
 
 } // extern
 
