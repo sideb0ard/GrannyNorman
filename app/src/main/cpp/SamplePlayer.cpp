@@ -31,6 +31,15 @@ namespace {
 }
 
 
+void SamplePlayer::Reset() {
+
+    grain_duration_ms_ = default_grain_duration_ms;
+    grains_per_sec_ = default_grains_per_second;
+    granular_fudge_ms = 0;
+    granular_spray_ms_ = 0;
+    loop_mode_ = LOOP_MODE::LOOP;
+}
+
 SamplePlayer::SamplePlayer(AAssetManager *mgr, std::string const &sample_name) {
 
     AAsset *wav =
@@ -42,10 +51,12 @@ SamplePlayer::SamplePlayer(AAssetManager *mgr, std::string const &sample_name) {
                 static_cast<unsigned char const *>(AAsset_getBuffer(wav));
         if (asset_buffer) {
             if (WavDataLoadFromAssetBuffer(&sample_data_, asset_buffer)) {
-                active_ = true;
+                // active_ = true;
             }
         }
     }
+
+    Reset();
 }
 
 StereoValue SamplePlayer::Generate(TimingData timing_data) {
@@ -62,18 +73,18 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
 
         cur_grain_num_ = GetAvailableGrainNumber();
 
-        int duration = grain_duration_ms_ * 44.1;
-        if (quasi_grain_fudge_ != 0)
-            duration += rand() % (int) (quasi_grain_fudge_ *
-                                        timing_data.sample_rate / 1000.);
+        float samples_per_ms = timing_data.sample_rate / 1000.;
+        int duration = grain_duration_ms_ * samples_per_ms;
+        if (granular_fudge_ms != 0)
+            duration += rand() % (int) (granular_fudge_ms * samples_per_ms);
 
         int grain_idx = read_idx_;
         if (selection_mode_ == SELECTION_MODE::RANDOM)
             grain_idx = rand() % (sample_data_.data_len -
                                   (duration * sample_data_.num_channels));
 
-        if (granular_spray_frames_ > 0)
-            grain_idx += rand() % granular_spray_frames_;
+        if (granular_spray_ms_ > 0)
+            grain_idx += rand() % (int) (granular_spray_ms_ * samples_per_ms);
 
         int attack_time_pct = grain_attack_time_pct_;
         int release_time_pct = grain_release_time_pct_;
@@ -88,7 +99,8 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
                 .num_channels =
                 sample_data_.num_channels,
                 .degrade_by = degrade_by_,
-                .debug = debug_};
+                .debug = debug_,
+                .envelope_mode = envelope_mode_};
 
 
         SetGrain(grains_[cur_grain_num_], params);
@@ -111,6 +123,32 @@ StereoValue SamplePlayer::Generate(TimingData timing_data) {
 
 void SamplePlayer::EventNotify(Event ev) {
 
+
+    if (ev.is_start_of_bar && !started_) {
+        started_ = true;
+        __android_log_print(ANDROID_LOG_ERROR, "WOOP",
+                            "START OF LOOPO:%d READ IDX:%d",
+                            ev.midi_tick % PPBAR, read_idx_);
+    }
+
+    if (ev.is_start_of_bar) {
+        if (scramble_pending_) {
+            __android_log_print(ANDROID_LOG_ERROR, "YAS!",
+                                "sCRRRRAMMMBLE!");
+            scramble_mode_ = true;
+            scramble_pending_ = false;
+        } else
+            scramble_mode_ = false;
+
+        if (stutter_pending_) {
+            __android_log_print(ANDROID_LOG_ERROR, "YAS!",
+                                "STUUUUTTTUTUUTUTUTUTUTUER");
+            stutter_mode_ = true;
+            stutter_pending_ = false;
+        } else
+            stutter_mode_ = false;
+    }
+
     if (loop_mode_ == LOOP_MODE::LOOP) {
         int relative_midi_tick = ev.midi_tick % PPBAR;
         double percent_of_loop = (double) relative_midi_tick / PPBAR;
@@ -120,14 +158,40 @@ void SamplePlayer::EventNotify(Event ev) {
                                 "YOUCH!! REL MIDI:%d PCT:%f NEW READ IDX:%f",
                                 relative_midi_tick, percent_of_loop, new_read_idx);
         }
-        read_idx_ = new_read_idx;
+        if (scramble_mode_) {
+            read_idx_ =
+                    new_read_idx + (scramble_diff_ * sample_data_.size_of_sixteenth_in_frames);
+        } else if (stutter_mode_) {
+            int cur_sixteenth = ev.timing_data.sixteenth_note_tick % 16;
+            int rel_pos_within_a_sixteenth =
+                    new_read_idx - (cur_sixteenth * sample_data_.size_of_sixteenth_in_frames);
+            read_idx_ =
+                    (stutter_idx_ * sample_data_.size_of_sixteenth_in_frames) +
+                    rel_pos_within_a_sixteenth;
+        } else
+            read_idx_ = new_read_idx;
     }
 
-    if (ev.is_start_of_bar && !started_) {
-        started_ = true;
-        __android_log_print(ANDROID_LOG_ERROR, "WOOP",
-                            "START OF LOOPO:%d READ IDX:%d",
-                            ev.midi_tick % PPBAR, read_idx_);
+    if (ev.is_sixteenth) {
+        if (scramble_mode_) {
+            int cur_sixteenth = ev.timing_data.sixteenth_note_tick % 16;
+            if (cur_sixteenth % 2 != 0) {
+                int randy = rand() % 100;
+                if (randy < 25)
+                    scramble_diff_ = 3 - cur_sixteenth;
+                else if (randy < 50)
+                    scramble_diff_ = 4 - cur_sixteenth;
+                else if (randy < 75)
+                    scramble_diff_ = 7 - cur_sixteenth;
+            }
+        }
+
+        if (stutter_mode_) {
+            if (rand() % 100 > 75)
+                stutter_idx_++;
+            if (stutter_idx_ == 16)
+                stutter_idx_ = 0;
+        }
     }
 }
 
@@ -256,13 +320,41 @@ void SamplePlayer::SetParam(std::string val_name, double val) {
         SetGrainDuration(val);
     } else if (val_name.compare("grain_fudge") == 0) {
         SetGrainFudge(val);
-    } else if (val_name.compare("grain_duration") == 0) {
+    } else if (val_name.compare("grain_spray") == 0) {
         SetGrainSpray(val);
     } else if (val_name.compare("grain_index") == 0) {
         SetGrainIndex(val);
     } else if (val_name.compare("granular_mode") == 0) {
         SetGranularMode(val);
+    } else if (val_name.compare("envelope_mode") == 0) {
+        SetEnvelopeMode(val);
+    } else if (val_name.compare("scramble_mode") == 0) {
+        SetScrambleMode();
+    } else if (val_name.compare("stutter_mode") == 0) {
+        SetStutterMode();
     }
+}
+
+float SamplePlayer::GetParam(std::string val_name) {
+    if (val_name.compare("grains_per_second") == 0) {
+        return grains_per_sec_;
+    } else if (val_name.compare("grain_duration") == 0) {
+        return grain_duration_ms_;
+    } else if (val_name.compare("grain_fudge") == 0) {
+        return granular_fudge_ms;
+    } else if (val_name.compare("grain_spray") == 0) {
+        return granular_spray_ms_;
+    } else if (val_name.compare("grain_index") == 0) {
+        return read_idx_;
+    } else if (val_name.compare("envelope_mode") == 0) {
+        if (envelope_mode_ == ENVELOPE_MODE::PARABOLIC)
+            return 0.;
+        else if (envelope_mode_ == ENVELOPE_MODE::TRAPEZOIDAL)
+            return 1.;
+        else if (envelope_mode_ == ENVELOPE_MODE::RAISED_COSINE_BELL)
+            return 2.;
+    }
+    return -1.;
 }
 
 void SamplePlayer::SetGrainsPerSecond(double val) {
@@ -274,11 +366,11 @@ void SamplePlayer::SetGrainDuration(double val) {
 }
 
 void SamplePlayer::SetGrainFudge(double val) {
-    quasi_grain_fudge_ = val;
+    granular_fudge_ms = val;
 }
 
 void SamplePlayer::SetGrainSpray(double val) {
-    granular_spray_frames_ = val;
+    granular_spray_ms_ = val;
 }
 
 void SamplePlayer::SetGrainIndex(int val) {
@@ -291,6 +383,32 @@ void SamplePlayer::SetGrainIndex(int val) {
 
 void SamplePlayer::SetGranularMode(int val) {
 
-    // loop_mode_ = val;
+    // TODO - fix - this is a toggle
+    if (loop_mode_ == LOOP_MODE::LOOP)
+        loop_mode_ = LOOP_MODE::SMUDGE;
+    else
+        loop_mode_ = LOOP_MODE::LOOP;
 
 }
+
+void SamplePlayer::SetEnvelopeMode(int val) {
+    if (val == 0)
+        envelope_mode_ = ENVELOPE_MODE::PARABOLIC;
+    else if (val == 1)
+        envelope_mode_ = ENVELOPE_MODE::TRAPEZOIDAL;
+    else if (val == 2)
+        envelope_mode_ = ENVELOPE_MODE::RAISED_COSINE_BELL;
+    __android_log_print(ANDROID_LOG_ERROR, "ENVELOPEOPOPOPE",
+                        "MODE:%d", val);
+
+}
+
+void SamplePlayer::SetStutterMode() {
+    stutter_pending_ = true;
+}
+
+
+void SamplePlayer::SetScrambleMode() {
+    scramble_pending_ = true;
+}
+

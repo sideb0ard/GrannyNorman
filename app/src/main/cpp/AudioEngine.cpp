@@ -36,12 +36,26 @@ void AudioEngine::Start(AAssetManager *mgr) {
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
     stream_->requestStart();
 
-    auto looper = make_unique<SamplePlayer>(mgr_, "Sounds/pad.wav");
-    sound_generators_.emplace_back(std::move(looper));
+    auto drums = make_unique<SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+    sound_generators_.emplace_back(std::move(drums));
+    sound_generators_[0]->SetActive(true);
+
+    auto bass = make_unique<SamplePlayer>(mgr_, "Sounds/bass.wav");
+    sound_generators_.emplace_back(std::move(bass));
+    //sound_generators_[1]->SetActive(true);
+
+    auto strings = make_unique<SamplePlayer>(mgr_, "Sounds/strings.wav");
+    sound_generators_.emplace_back(std::move(strings));
+    sound_generators_[2]->SetActive(true);
+
+    auto techno = make_unique<SamplePlayer>(mgr_, "Sounds/techno.wav");
+    sound_generators_.emplace_back(std::move(techno));
+    sound_generators_[3]->SetActive(true);
+
 
 }
 
-void AudioEngine::EmitEvent() {
+void AudioEngine::EmitEvent(TimingData timing_data) {
 
     int midi_tick = link_manager_.GetMidiTick();
     Event ev(midi_tick);
@@ -81,6 +95,8 @@ void AudioEngine::EmitEvent() {
         }
     }
 
+    ev.timing_data = timing_data;
+
 
     for (const auto &sg: sound_generators_) {
         sg->EventNotify(ev);
@@ -98,11 +114,14 @@ AudioEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audio_data, int32
     for (int i = 0; i < num_frames; i++) {
 
         double output_val{0};
-        for (const auto &sg: sound_generators_) {
-            if (sg->IsActive()) {
-                StereoValue val = sg->Generate(timing_data);
-                // TODO add Stereo Output
-                output_val += val.first;
+
+        if (active_) {
+            for (const auto &sg: sound_generators_) {
+                if (sg->IsActive()) {
+                    StereoValue val = sg->Generate(timing_data);
+                    // TODO add Stereo Output
+                    output_val += val.first;
+                }
             }
         }
 
@@ -110,7 +129,7 @@ AudioEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audio_data, int32
 
 
         if (link_manager_.IsMidiTick(i)) {
-            EmitEvent();
+            EmitEvent(timing_data);
 
         }
     }
@@ -120,7 +139,7 @@ AudioEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audio_data, int32
             oboe::DataCallbackResult::Continue;
 }
 
-void AudioEngine::SetGrainsPerSecond(float val){
+void AudioEngine::SetGrainsPerSecond(float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
@@ -128,33 +147,83 @@ void AudioEngine::SetGrainsPerSecond(float val){
     sound_generators_[0]->SetParam("grains_per_second", val);
 }
 
-void AudioEngine::SetGrainDuration(float val){
+void AudioEngine::SetGrainDuration(float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
     sound_generators_[0]->SetParam("grain_duration", val);
 }
 
-void AudioEngine::SetGrainSpray(float val){
+void AudioEngine::SetGrainSpray(float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
     sound_generators_[0]->SetParam("grain_spray", val);
 }
 
-void AudioEngine::SetGrainFudge(float val){
+void AudioEngine::SetGrainFudge(float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
     sound_generators_[0]->SetParam("grain_fudge", val);
 }
 
-void AudioEngine::SetGrainIndex(int val)
-{
+void AudioEngine::SetGrainIndex(int val) {
     sound_generators_[0]->SetParam("grain_index", val);
 }
 
-void AudioEngine::SetGranularMode(int val)
-{
+void AudioEngine::SetGranularMode(int val) {
     sound_generators_[0]->SetParam("granular_mode", val);
 }
+
+void AudioEngine::SetEnvelopeMode(int val) {
+    sound_generators_[0]->SetParam("envelope_mode", val);
+}
+
+///
+
+float AudioEngine::GetGrainsPerSecond() {
+
+    return sound_generators_[0]->GetParam("grains_per_second");
+}
+
+float AudioEngine::GetGrainDuration() {
+
+    return sound_generators_[0]->GetParam("grain_duration");
+}
+
+float AudioEngine::GetGrainSpray() {
+
+
+    return sound_generators_[0]->GetParam("grain_spray");
+}
+
+float AudioEngine::GetGrainFudge() {
+
+
+    return sound_generators_[0]->GetParam("grain_fudge");
+}
+
+float AudioEngine::GetGrainIndex() {
+    return sound_generators_[0]->GetParam("grain_index");
+}
+
+void AudioEngine::ToggleOnOff() {
+    active_ = 1 - active_;
+}
+
+void AudioEngine::Reset() {
+    return sound_generators_[0]->Reset();
+}
+
+void AudioEngine::Scramble() {
+    return sound_generators_[0]->SetParam("scramble_mode", 1);
+}
+
+void AudioEngine::Stutter() {
+    return sound_generators_[0]->SetParam("stutter_mode", 1);
+}
+
+
+
+

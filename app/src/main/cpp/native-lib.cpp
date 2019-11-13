@@ -56,5 +56,69 @@ Java_com_theb0ardside_grannynorman_MainActivity_setGrainIndex(JNIEnv *env, jobje
     engine.SetGrainIndex(val);
 }
 
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_toggleGranularMode(JNIEnv *env, jobject instance)
+{
+    engine.SetGranularMode(1);
+}
+
+JNIEXPORT float JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_getGrainsPerSecond(JNIEnv *env, jobject instance)
+{
+    return engine.GetGrainsPerSecond();
+}
+
+JNIEXPORT float JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_getGrainDuration(JNIEnv *env, jobject instance)
+{
+    return engine.GetGrainDuration();
+}
+
+JNIEXPORT float JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_getGrainSpray(JNIEnv *env, jobject instance)
+{
+    return engine.GetGrainSpray();
+}
+
+JNIEXPORT float JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_getGrainFudge(JNIEnv *env, jobject instance)
+{
+    return engine.GetGrainFudge();
+}
+
+JNIEXPORT float JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_getGrainIndex(JNIEnv *env, jobject instance)
+{
+    return engine.GetGrainIndex();
+}
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_toggleOnOffMode(JNIEnv *env, jobject instance)
+{
+    engine.ToggleOnOff();
+}
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_setEnvelopeMode(JNIEnv *env, jobject instance, jint mode)
+{
+    engine.SetEnvelopeMode(mode);
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_reset(JNIEnv *env, jobject instance) {
+    engine.Reset();
+}
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_scramble(JNIEnv *env, jobject instance) {
+    engine.Scramble();
+}
+
+JNIEXPORT void JNICALL
+Java_com_theb0ardside_grannynorman_MainActivity_stutter(JNIEnv *env, jobject instance) {
+    engine.Stutter();
+}
+
 } // extern
 

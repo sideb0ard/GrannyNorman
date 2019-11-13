@@ -30,6 +30,19 @@
         void SetGrainIndex(int val);
         void SetGranularMode(int val);
 
+        float GetGrainsPerSecond();
+        float GetGrainDuration();
+        float GetGrainSpray();
+        float GetGrainFudge();
+        float GetGrainIndex();
+
+        void ToggleOnOff();
+        void Reset();
+        void Scramble();
+        void Stutter();
+
+        void SetEnvelopeMode(int mode);
+
         oboe::DataCallbackResult
         onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;
 
@@ -43,8 +56,10 @@
 
         std::vector<std::unique_ptr<SoundGenerator>> sound_generators_;
 
+        bool active_ = true;
+
     private:
-        void EmitEvent();
+        void EmitEvent(TimingData timing_data);
 
 
     };

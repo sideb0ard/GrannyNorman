@@ -12,6 +12,7 @@
     struct WavData {
         int16_t *data = nullptr;
         float *fdata = nullptr;
+        int size_of_sixteenth_in_frames{0};
         unsigned long data_len{0};
         int num_channels{0};
         int sample_rate{0};

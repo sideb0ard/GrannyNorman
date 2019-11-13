@@ -131,6 +131,7 @@ namespace {
 
                 // DATA!
                 wavData->data_len = data_size_bytes / sizeof(short);
+                wavData->size_of_sixteenth_in_frames = wavData->data_len / 16; // TODO * loop len
                 __android_log_print(ANDROID_LOG_ERROR, "WOOP", "DATA LEN::: %lu",
                                     wavData->data_len);
                 wavData->data = new int16_t[wavData->data_len];

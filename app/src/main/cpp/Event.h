@@ -5,6 +5,8 @@
 #ifndef GRANNYNORMAN_EVENT_H
 #define GRANNYNORMAN_EVENT_H
 
+#include "TimingData.h"
+
 
 
     enum class EventType {
@@ -30,6 +32,8 @@
         bool is_quarter{false};
         bool is_third{false};
         bool is_start_of_bar{false};
+
+        TimingData timing_data;
 
         //        double time_of_next_midi_tick;
         //        int loop_beat;

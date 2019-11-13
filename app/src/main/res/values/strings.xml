@@ -4,5 +4,14 @@
     <string name="grains_per_second">Grains Per Second</string>
     <string name="grain_duration">Grain Duration</string>
     <string name="spray">Spray</string>
+    <string name="granular_mode">Loop On/Off</string>
     <string name="fudge">Fudge</string>
+    <string name="reset">Reset</string>
+    <string name="stutter">Stutter</string>
+    <string name="scramble">Scramble</string>
+    <string-array name="envelope_types">
+        <item>Parabolic</item>
+        <item>Trapezoidal</item>
+        <item>Raised Cosine Bell</item>
+    </string-array>
 </resources>
