@@ -22,26 +22,33 @@
     public:
 
         void Start(AAssetManager *mgr);
+        int GetSharingMode();
 
-        void SetGrainsPerSecond(float val);
-        void SetGrainDuration(float val);
-        void SetGrainSpray(float val);
-        void SetGrainFudge(float val);
-        void SetGrainIndex(int val);
-        void SetGranularMode(int val);
+        void SetGrainsPerSecond(int target, float val);
+        void SetGrainDuration(int target, float val);
+        void SetGrainSpray(int target, float val);
+        void SetGrainFudge(int target, float val);
+        void SetGrainIndex(int target, int val);
+        void SetGranularMode(int target, int val);
+        void SetEnvelopeMode(int target, int mode);
 
-        float GetGrainsPerSecond();
-        float GetGrainDuration();
-        float GetGrainSpray();
-        float GetGrainFudge();
-        float GetGrainIndex();
+        float GetGrainsPerSecond(int target);
+        float GetGrainDuration(int target);
+        float GetGrainSpray(int target);
+        float GetGrainFudge(int target);
+        float GetGrainIndex(int target);
+        int GetEnvelopeMode(int target);
 
-        void ToggleOnOff();
-        void Reset();
-        void Scramble();
-        void Stutter();
+        int GetActive(int target);
+        int GetLoopMode(int target);
 
-        void SetEnvelopeMode(int mode);
+        void ToggleOnOff(int target);
+        void Randomize(int target);
+        void Reset(int target);
+        void Scramble(int target);
+        void Stutter(int target);
+
+
 
         oboe::DataCallbackResult
         onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;

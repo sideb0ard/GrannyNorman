@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,37 +20,49 @@ public class MainActivity extends AppCompatActivity {
 
     private native void startEngine(AssetManager mgr);
 
-    private native void setGrainsPerSecond(float val);
+    // per Sampler functions - first param is sampler #
 
-    private native float getGrainsPerSecond();
+    private native void setGrainsPerSecond(int target, float val);
 
-    private native void setGrainDuration(float val);
+    private native float getGrainsPerSecond(int target);
 
-    private native float getGrainDuration();
+    private native void setGrainDuration(int target, float val);
 
-    private native void setGrainSpray(float val);
+    private native float getGrainDuration(int target);
 
-    private native float getGrainSpray();
+    private native void setGrainSpray(int target, float val);
 
-    private native void setGrainFudge(float val);
+    private native float getGrainSpray(int target);
 
-    private native float getGrainFudge();
+    private native void setGrainFudge(int target, float val);
 
-    private native void setGranularMode(int mode);
+    private native float getGrainFudge(int target);
 
-    private native void setGrainIndex(int val);
+    private native void setGranularMode(int target, int mode);
 
-    private native int getGrainIndex();
+    private native void setGrainIndex(int target, int val);
 
-    private native void toggleGranularMode();
+    private native int getGrainIndex(int target);
 
-    private native void toggleOnOffMode();
+    private native void toggleGranularMode(int target); // bad name - loop mode?
 
-    private native void setEnvelopeMode(int val);
+    private native void toggleOnOffMode(int target);
 
-    private native void reset();
-    private native void scramble();
-    private native void stutter();
+    private native void setEnvelopeMode(int target, int val);
+
+    private native void randomize(int target);
+
+    private native void reset(int target);
+
+    private native void scramble(int target);
+
+    private native void stutter(int target);
+
+    private native int getActive(int target);
+
+    private native int getLoopMode(int target);
+
+    private native int getEnvelopeMode(int target);
 
     private AssetManager mgr;
 
@@ -60,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     SeekBar seekbar_grains_per_second;
     private int seekbar_grains_per_second_min = 1;
-    private int seekbar_grains_per_second_max = 50;
+    private int seekbar_grains_per_second_max = 100;
     private TextView grains_per_second_value;
 
     SeekBar grain_duration_seekbar;
@@ -80,9 +93,11 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView sample_display_num;
 
-    Button modeButton;
-    Button onOffButton;
-    Button resetButton;
+    Switch modeSwitch;
+    Switch onOffSwitch;
+
+    Button loopButton;
+    Button randButton;
     Button stutterButton;
     Button scrambleButton;
 
@@ -98,24 +113,34 @@ public class MainActivity extends AppCompatActivity {
 
     protected void updateInterface() {
 
-        grain_index_value.setText(String.valueOf(0));
-        seekbar_grain_index.setProgress(0);
+        onOffSwitch.setChecked(getActive(sample_number) == 1);
+        modeSwitch.setChecked(getLoopMode(sample_number) == 1);
 
-        float grains_per_sec = getGrainsPerSecond();
+        int grain_idx = getGrainIndex(sample_number);
+        Log.v("INTz", "Idx:" + grain_idx);
+        if (grain_idx < 0 || grain_idx > 100)
+            grain_idx = 0;
+        grain_index_value.setText(String.valueOf(grain_idx));
+        seekbar_grain_index.setProgress(grain_idx);
+
+        float grains_per_sec = getGrainsPerSecond(sample_number);
         grains_per_second_value.setText(String.valueOf(grains_per_sec));
         seekbar_grains_per_second.setProgress((int) Utilz.scale(grains_per_sec, seekbar_grains_per_second_min, seekbar_grains_per_second_max, 0, 100));
 
-        float grain_duration = getGrainDuration();
+        float grain_duration = getGrainDuration(sample_number);
         grain_duration_value.setText(String.valueOf(grain_duration));
         grain_duration_seekbar.setProgress((int) Utilz.scale(grain_duration, seekbar_grain_duration_min, seekbar_grain_duration_max, 0, 100));
 
-        float grain_spray = getGrainSpray();
+        float grain_spray = getGrainSpray(sample_number);
         spray_value.setText(String.valueOf(grain_spray));
         seekbar_spray.setProgress((int) Utilz.scale(grain_spray, seekbar_spray_min, seekbar_spray_max, 0, 100));
 
-        float grain_fudge = getGrainFudge();
+        float grain_fudge = getGrainFudge(sample_number);
         fudge_value.setText(String.valueOf(grain_fudge));
         seekbar_fudge.setProgress((int) Utilz.scale(grain_fudge, seekbar_fudge_min, seekbar_fudge_max, 0, 100));
+
+        int envelope_mode = getEnvelopeMode(sample_number);
+        envelope_spinner.setSelection(envelope_mode);
 
     }
 
@@ -148,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                                     int val,
                                     boolean fromUser) {
 
-                                setGrainIndex(val);
+                                setGrainIndex(sample_number, val);
                                 grain_index_value.setText(String.valueOf(val));
                             }
 
@@ -178,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 double scaled_val = Utilz.scale(val, 0, 100, seekbar_grains_per_second_min, seekbar_grains_per_second_max);
-                                setGrainsPerSecond((float) scaled_val);
+                                setGrainsPerSecond(sample_number, (float) scaled_val);
                                 grains_per_second_value.setText(String.valueOf(scaled_val));
                             }
 
@@ -206,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 double scaled_val = Utilz.scale(val, 0, 100, seekbar_grain_duration_min, seekbar_grain_duration_max);
-                                setGrainDuration((float) scaled_val);
+                                setGrainDuration(sample_number, (float) scaled_val);
                                 grain_duration_value.setText(String.valueOf(scaled_val));
                             }
 
@@ -234,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 double scaled_val = Utilz.scale(val, 0, 100, seekbar_spray_min, seekbar_spray_max);
-                                setGrainSpray((float) scaled_val);
+                                setGrainSpray(sample_number, (float) scaled_val);
                                 spray_value.setText(String.valueOf(scaled_val));
                             }
 
@@ -262,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                                     boolean fromUser) {
 
                                 double scaled_val = Utilz.scale(val, 0, 100, seekbar_fudge_min, seekbar_fudge_max);
-                                setGrainFudge((float) scaled_val);
+                                setGrainFudge(sample_number, (float) scaled_val);
                                 fudge_value.setText(String.valueOf(scaled_val));
 
                             }
@@ -276,48 +301,51 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-        modeButton = findViewById(R.id.button);
-        modeButton.setOnClickListener(new View.OnClickListener() {
+        modeSwitch = findViewById(R.id.button);
+        modeSwitch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                toggleGranularMode();
+                toggleGranularMode(sample_number);
                 // Code here executes on main thread after user presses button
             }
         });
 
-        onOffButton = findViewById(R.id.button2);
-        onOffButton.setOnClickListener(new View.OnClickListener() {
+        onOffSwitch = findViewById(R.id.button2);
+        onOffSwitch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                toggleOnOffMode();
+                toggleOnOffMode(sample_number);
             }
         });
 
-        resetButton = findViewById(R.id.button3);
-        resetButton.setOnClickListener(new View.OnClickListener() {
+        loopButton = findViewById(R.id.button3);
+        loopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                reset();
+                reset(sample_number);
                 updateInterface();
             }
         });
 
+        randButton = findViewById(R.id.button_rand);
+        randButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                randomize(sample_number);
+                updateInterface();
+            }
+        });
 
         scrambleButton = findViewById(R.id.button4);
         scrambleButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                scramble();
+                scramble(sample_number);
             }
         });
 
         stutterButton = findViewById(R.id.button5);
         stutterButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                stutter();
+                stutter(sample_number);
             }
         });
 
-
-        startEngine(mgr);
-
-        updateInterface();
 
         envelope_spinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -327,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
         envelope_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setEnvelopeMode(position);
+                setEnvelopeMode(sample_number, position);
             }
 
             @Override
@@ -335,6 +363,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        startEngine(mgr);
+
+        updateInterface();
 
 
     }
@@ -344,26 +376,27 @@ public class MainActivity extends AppCompatActivity {
         boolean checked = ((RadioButton) view).isChecked();
 
         // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.radio_drum:
+        switch (view.getId()) {
+            case R.id.radio_0:
                 if (checked)
                     sample_number = 0;
-                    break;
-            case R.id.radio_bass:
+                break;
+            case R.id.radio_1:
                 if (checked)
                     sample_number = 1;
-                    break;
-            case R.id.radio_strings:
+                break;
+            case R.id.radio_2:
                 if (checked)
                     sample_number = 2;
-                    break;
-            case R.id.radio_thingie:
+                break;
+            case R.id.radio_3:
                 if (checked)
                     sample_number = 3;
-                    break;
+                break;
         }
 
         sample_display_num.setText(String.valueOf(sample_number));
+        updateInterface();
     }
 
 

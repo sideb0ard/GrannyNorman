@@ -11,33 +11,40 @@
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginStart="50dp"
         android:layout_marginTop="26dp"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
-        <RadioButton android:id="@+id/radio_drum"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/radio_0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Drum"
             android:checked="true"
-            android:onClick="onRadioButtonClicked"/>
-        <RadioButton android:id="@+id/radio_bass"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/radio_0" />
+
+        <RadioButton
+            android:id="@+id/radio_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bass"
-            android:onClick="onRadioButtonClicked"/>
-        <RadioButton android:id="@+id/radio_strings"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/radio_1" />
+
+        <RadioButton
+            android:id="@+id/radio_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Strings"
-            android:onClick="onRadioButtonClicked"/>
-        <RadioButton android:id="@+id/radio_thingie"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/radio_2" />
+
+        <RadioButton
+            android:id="@+id/radio_3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thingie"
-            android:onClick="onRadioButtonClicked"/>
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/radio_3" />
     </RadioGroup>
 
     <!-- On Off -->
@@ -47,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
         android:layout_marginTop="80dp"
-        android:text="On/Off"
+        android:text="@string/onOff"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -245,25 +252,35 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <!-- Reset Button -->
+    <!-- Loop Button -->
     <Button
         android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="592dp"
-        android:text="@string/reset"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="580dp"
+        android:text="@string/loop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Rand Button -->
+    <Button
+        android:id="@+id/button_rand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="122dp"
+        android:layout_marginTop="580dp"
+        android:text="@string/rand"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Scramble Button -->
     <Button
         android:id="@+id/button4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="592dp"
-        android:layout_marginStart="150dp"
+        android:layout_marginStart="204dp"
+        android:layout_marginTop="580dp"
         android:text="@string/scramble"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -274,8 +291,8 @@
         android:id="@+id/button5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="255dp"
-        android:layout_marginTop="592dp"
+        android:layout_marginStart="287dp"
+        android:layout_marginTop="580dp"
         android:text="@string/stutter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -291,6 +308,13 @@
         android:text="SampleNum"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

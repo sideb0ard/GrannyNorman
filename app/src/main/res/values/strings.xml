@@ -4,14 +4,21 @@
     <string name="grains_per_second">Grains Per Second</string>
     <string name="grain_duration">Grain Duration</string>
     <string name="spray">Spray</string>
-    <string name="granular_mode">Loop On/Off</string>
+    <string name="granular_mode">Loop Off/On</string>
+    <string name="onOff">Off/On</string>
     <string name="fudge">Fudge</string>
-    <string name="reset">Reset</string>
+    <string name="loop">Loop</string>
+    <string name="rand">Rand</string>
     <string name="stutter">Stutter</string>
-    <string name="scramble">Scramble</string>
+    <string name="scramble">Fsck</string>
+    <string name="radio_0">0</string>
+    <string name="radio_1">1</string>
+    <string name="radio_2">2</string>
+    <string name="radio_3">3</string>
     <string-array name="envelope_types">
         <item>Parabolic</item>
         <item>Trapezoidal</item>
-        <item>Raised Cosine Bell</item>
+        <item>Exponential Curve</item>
+        <item>Logarithmic Curve</item>
     </string-array>
 </resources>

@@ -36,26 +36,36 @@ void AudioEngine::Start(AAssetManager *mgr) {
     stream_->setBufferSizeInFrames(stream_->getFramesPerBurst() * 2);
     stream_->requestStart();
 
-    auto drums = make_unique<SamplePlayer>(mgr_, "Sounds/thinkloop.wav");
+    auto drums = make_unique<SamplePlayer>(mgr_, "Sounds/FoolishGPitch.wav");
     sound_generators_.emplace_back(std::move(drums));
-    sound_generators_[0]->SetActive(true);
+    sound_generators_[0]->Random();
+//    sound_generators_[0]->SetActive(true);
 
-    auto bass = make_unique<SamplePlayer>(mgr_, "Sounds/bass.wav");
+    auto bass = make_unique<SamplePlayer>(mgr_, "Sounds/front2WestChord1.wav");
     sound_generators_.emplace_back(std::move(bass));
+    sound_generators_[1]->Random();
     //sound_generators_[1]->SetActive(true);
 
-    auto strings = make_unique<SamplePlayer>(mgr_, "Sounds/strings.wav");
+    auto strings = make_unique<SamplePlayer>(mgr_, "Sounds/gaborNote.wav");
     sound_generators_.emplace_back(std::move(strings));
-    sound_generators_[2]->SetActive(true);
+    sound_generators_[2]->Random();
+//    sound_generators_[2]->SetActive(true);
 
-    auto techno = make_unique<SamplePlayer>(mgr_, "Sounds/techno.wav");
+    auto techno = make_unique<SamplePlayer>(mgr_, "Sounds/808drumloop.wav");
     sound_generators_.emplace_back(std::move(techno));
-    sound_generators_[3]->SetActive(true);
+    sound_generators_[3]->Random();
+//    sound_generators_[3]->SetActive(true);
 
 
 }
 
 void AudioEngine::EmitEvent(TimingData timing_data) {
+
+//    oboe::SharingMode sharing_mode = stream_->getSharingMode();
+//    if (sharing_mode != oboe::SharingMode::Exclusive) {
+//        __android_log_print(ANDROID_LOG_ERROR, "WOOF",
+//                            "SHARING MODE IS NOTE EXCLUSIVE!!");
+//    }
 
     int midi_tick = link_manager_.GetMidiTick();
     Event ev(midi_tick);
@@ -139,91 +149,115 @@ AudioEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audio_data, int32
             oboe::DataCallbackResult::Continue;
 }
 
-void AudioEngine::SetGrainsPerSecond(float val) {
+void AudioEngine::SetGrainsPerSecond(int target, float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
 
-    sound_generators_[0]->SetParam("grains_per_second", val);
+    sound_generators_[target]->SetParam("grains_per_second", val);
 }
 
-void AudioEngine::SetGrainDuration(float val) {
+void AudioEngine::SetGrainDuration(int target, float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
-    sound_generators_[0]->SetParam("grain_duration", val);
+    sound_generators_[target]->SetParam("grain_duration", val);
 }
 
-void AudioEngine::SetGrainSpray(float val) {
+void AudioEngine::SetGrainSpray(int target, float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
-    sound_generators_[0]->SetParam("grain_spray", val);
+    sound_generators_[target]->SetParam("grain_spray", val);
 }
 
-void AudioEngine::SetGrainFudge(float val) {
+void AudioEngine::SetGrainFudge(int target, float val) {
 
     __android_log_print(ANDROID_LOG_ERROR, "WOOP",
                         "VVAL:%F", val);
-    sound_generators_[0]->SetParam("grain_fudge", val);
+    sound_generators_[target]->SetParam("grain_fudge", val);
 }
 
-void AudioEngine::SetGrainIndex(int val) {
-    sound_generators_[0]->SetParam("grain_index", val);
+void AudioEngine::SetGrainIndex(int target, int val) {
+    sound_generators_[target]->SetParam("grain_index", val);
 }
 
-void AudioEngine::SetGranularMode(int val) {
-    sound_generators_[0]->SetParam("granular_mode", val);
+void AudioEngine::SetGranularMode(int target, int val) {
+    sound_generators_[target]->SetParam("granular_mode", val);
 }
 
-void AudioEngine::SetEnvelopeMode(int val) {
-    sound_generators_[0]->SetParam("envelope_mode", val);
+void AudioEngine::SetEnvelopeMode(int target, int val) {
+    sound_generators_[target]->SetParam("envelope_mode", val);
 }
 
 ///
 
-float AudioEngine::GetGrainsPerSecond() {
+float AudioEngine::GetGrainsPerSecond(int target) {
 
-    return sound_generators_[0]->GetParam("grains_per_second");
+    return sound_generators_[target]->GetParam("grains_per_second");
 }
 
-float AudioEngine::GetGrainDuration() {
+float AudioEngine::GetGrainDuration(int target) {
 
-    return sound_generators_[0]->GetParam("grain_duration");
+    return sound_generators_[target]->GetParam("grain_duration");
 }
 
-float AudioEngine::GetGrainSpray() {
+float AudioEngine::GetGrainSpray(int target) {
 
 
-    return sound_generators_[0]->GetParam("grain_spray");
+    return sound_generators_[target]->GetParam("grain_spray");
 }
 
-float AudioEngine::GetGrainFudge() {
+float AudioEngine::GetGrainFudge(int target) {
 
 
-    return sound_generators_[0]->GetParam("grain_fudge");
+    return sound_generators_[target]->GetParam("grain_fudge");
 }
 
-float AudioEngine::GetGrainIndex() {
-    return sound_generators_[0]->GetParam("grain_index");
+float AudioEngine::GetGrainIndex(int target) {
+    return sound_generators_[target]->GetParam("grain_index");
 }
 
-void AudioEngine::ToggleOnOff() {
-    active_ = 1 - active_;
+int AudioEngine::GetEnvelopeMode(int target) {
+    return sound_generators_[target]->GetParam("envelope_mode");
 }
 
-void AudioEngine::Reset() {
-    return sound_generators_[0]->Reset();
-}
-
-void AudioEngine::Scramble() {
-    return sound_generators_[0]->SetParam("scramble_mode", 1);
-}
-
-void AudioEngine::Stutter() {
-    return sound_generators_[0]->SetParam("stutter_mode", 1);
+void AudioEngine::ToggleOnOff(int target) {
+    bool active = 1 - sound_generators_[target]->IsActive();
+    return sound_generators_[target]->SetActive(active);
 }
 
 
+void AudioEngine::Randomize(int target) {
+    return sound_generators_[target]->Random();
+}
+
+void AudioEngine::Reset(int target) {
+    return sound_generators_[target]->Reset();
+}
+
+void AudioEngine::Scramble(int target) {
+    return sound_generators_[target]->SetParam("scramble_mode", 1);
+}
+
+void AudioEngine::Stutter(int target) {
+    return sound_generators_[target]->SetParam("stutter_mode", 1);
+}
+
+
+int AudioEngine::GetActive(int target) {
+    return sound_generators_[target]->IsActive();
+}
+
+int AudioEngine::GetLoopMode(int target) {
+    return sound_generators_[target]->GetParam("loop_mode");
+}
+
+int AudioEngine::GetSharingMode() {
+    oboe::SharingMode sharing_mode = stream_->getSharingMode();
+    if (sharing_mode == oboe::SharingMode::Exclusive)
+        return 0;
+    return 1;
+}
 
 

@@ -19,9 +19,19 @@
 
 constexpr int max_grains = 1000;
 
-constexpr int default_grain_duration_ms = 64;
-constexpr int default_grains_per_second = 30;
+constexpr int grain_duration_min_ms = 10;
+constexpr int grain_duration_max_ms = 200;
+constexpr int grain_duration_default_ms = 64;
 
+constexpr int grains_per_second_min = 1;
+constexpr int grains_per_second_max = 100;
+constexpr int grains_per_second_default = 30;
+
+constexpr int grain_spray_min_ms = 0;
+constexpr int grain_spray_max_ms = 500;
+
+constexpr int grain_fudge_min_ms = 0;
+constexpr int grain_fudge_max_ms = 500;
 
 enum class SELECTION_MODE {
     STATIC,
@@ -37,7 +47,8 @@ enum class LOOP_MODE {
 enum class ENVELOPE_MODE {
     PARABOLIC,
     TRAPEZOIDAL,
-    RAISED_COSINE_BELL,
+    EXPONENTIAL_CURVE,
+    LOGARITHMIC_CURVE,
 };
 
 struct SoundGrainInitParams {
@@ -62,28 +73,46 @@ struct SoundGrain {
 
     int grain_len_frames;
     int grain_counter_frames;
-    int audiobuffer_num;
-    int audiobuffer_start_idx;
     int audiobuffer_num_channels;
-    double audiobuffer_cur_pos;
-    double audiobuffer_pitch;
-    double incr;
+    float audiobuffer_cur_pos;
+    int audiobuffer_starting_idx;
+//    float audiobuffer_pitch;
+    float incr;
 
     int degrade_by;
 
-    int attack_time_pct; // percent of grain_len_frames
-    int attack_time_samples;
-    int release_time_pct; // percent of grain_len_frames
-    int release_time_samples;
     bool active;
-    double amp;
-    double slope;
-    double curve;
+
+
+    //// Envelope vars
+    ENVELOPE_MODE envelope_mode;
+    float amp;
+
+    //EnvelopeGenerator env_;
+    // Parabolic Env vars
+    float slope;
+    float curve;
+
+
+    int attack_time_samples;
+    int release_time_samples;
+    int attack_to_sustain_boundary_sample_idx;
+    int sustain_to_decay_boundary_sample_idx;
+    float previous_amplitude;
+
+    // Trapezoidal Env vars
+    float amplitude_increment;
+
+    // Exponential / Logarithmic
+    float exp_min = 0.2;
+    float exp_mul = 0;
+    float exp_now = 0;
+
+
     bool reverse_mode;
     bool debug;
+    int use_count{0};
 
-    ENVELOPE_MODE envelope_mode;
-    //EnvelopeGenerator env_;
 
 };
 
@@ -103,6 +132,8 @@ public:
 
     void Reset() override;
 
+    void Random() override;
+
 
 private:
     WavData sample_data_;
@@ -116,8 +147,8 @@ private:
 
     int granular_spray_ms_{0}; // random off-set from starting read index (ms)
     int granular_fudge_ms{0};     // random variation added to duration of grain (ms)
-    int grain_duration_ms_{default_grain_duration_ms};
-    int grains_per_sec_{default_grains_per_second};
+    int grain_duration_ms_{grain_duration_default_ms};
+    int grains_per_sec_{grains_per_second_default};
 
     bool reverse_mode_{false};
     bool debug_{false};
@@ -134,8 +165,8 @@ private:
 
 
     int last_grain_launched_frame_tick_{0};
-    int grain_attack_time_pct_{15};
-    int grain_release_time_pct_{15};
+    int grain_attack_time_pct_{25};
+    int grain_release_time_pct_{25};
 
     LOOP_MODE loop_mode_{LOOP_MODE::LOOP}; // enums above - LOOP, SMUDGE, STATIC
     double loop_len_{1};        // bars
@@ -150,6 +181,8 @@ private:
     bool stutter_mode_{false};
     bool stutter_pending_{false};
     int stutter_idx_{0};
+
+    bool log_env_val{true};
 
 private:
     int CalculateGrainSpacing(TimingData timing_data);
@@ -169,6 +202,7 @@ private:
     void SetGrainSpray(double val);
 
     void SetGrainIndex(int val);
+    int GetGrainIndex();
 
     void SetGranularMode(int val);
 

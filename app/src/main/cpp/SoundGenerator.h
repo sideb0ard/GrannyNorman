@@ -24,6 +24,7 @@ public:
     virtual float GetParam(std::string val_name) = 0;
 
     virtual void Reset() = 0;
+    virtual void Random() = 0;
 
     virtual ~SoundGenerator() = default;
 
